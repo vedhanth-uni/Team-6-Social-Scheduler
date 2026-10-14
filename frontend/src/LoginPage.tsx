@@ -1,11 +1,28 @@
+import './login.css';
+
 function LoginPage() {
   return (
     <main className="login-page">
-      <h1 className="login-title">Social Calendar</h1>
+      <div className = "logo-container">
+        <img
+          src="/logo.svg"
+          className="human-logo"
+          />
+          <div className = "green-logo-wrapper">
+            <img
+              src="/green_logo.svg"
+              className="green-logo"
+            />
+            <img
+              src="/social calendar.svg"
+              className="logo-text"
+            />
+          </div>
+
+      </div>
 
       <section className="login-container">
-        <h2>Hello</h2>
-        <p>Please login or create account</p>
+        <p className="login-subtitle">Please login or create account</p>
 
         <form className="login-form">
           <div className="form-group">

@@ -3,6 +3,7 @@
 # file silently never gets a table.
 
 from app.models.calendar import Calendar, CalendarShare
+from app.models.event import Attendee, Event
 from app.models.user import User
 
-__all__ = ["Calendar", "CalendarShare", "User"]
+__all__ = ["Attendee", "Calendar", "CalendarShare", "Event", "User"]

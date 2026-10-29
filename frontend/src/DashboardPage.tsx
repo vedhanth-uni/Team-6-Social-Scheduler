@@ -17,19 +17,21 @@ function DashboardPage() {
     const [showEventForm, setShowEventForm] = useState(false);
 
     return (<div>
-        <div className = "month-container">
-            <input
-                id ="current-month"
-                type="text"
-                value={currentMonth}
-                readOnly
+        <div className = "month-view-container">
+            <div className = "month-container">
+                <input
+                    id ="current-month"
+                    type="text"
+                    value={currentMonth}
+                    readOnly
 
+                />
+            </div>
+            <ViewDropdown 
+                currentView = {currentView} 
+                setCurrentView = {setCurrentView}
             />
-        </div>
-        <ViewDropdown 
-            currentView = {currentView} 
-            setCurrentView = {setCurrentView}
-        />
+          </div>
         <PrivacyToggle 
             selectedPrivacy = {selectedPrivacy} 
             setSelectedPrivacy={setSelectedPrivacy}

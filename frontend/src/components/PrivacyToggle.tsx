@@ -21,11 +21,11 @@ function PrivacyToggle({selectedPrivacy, setSelectedPrivacy}){
                 <input
                     type ="radio"
                     name="privacy-toggle"
-                    value="Public"
-                    checked={selectedPrivacy ==="Public"}
-                    onChange={()=>setSelectedPrivacy('Public')}
+                    value="Close"
+                    checked={selectedPrivacy ==="Close"}
+                    onChange={()=>setSelectedPrivacy('Close')}
                 />
-                <span>Public</span>
+                <span>Close</span>
             </label>
 
             <label className = "privacy-toggle-option">

@@ -4,9 +4,6 @@ __pycache__/
 *.py[cod]
 
 # Local configuration
-.env
-.env.*
-!.env.example
 
 # Local SQLite files
 *.db

@@ -4,26 +4,18 @@ from fastapi import FastAPI
 
 from contextlib import asynccontextmanager
 
-from app.database import engine,init_db
+from app import models
 
-from app.routers import health # this is how u call an endpoint file from the routers folder, so we're calling health.py in this case
+from app.database import create_db_and_tables
+
+from app.routers import health,profile # this is how u call an endpoint file from the routers folder, so we're calling health.py in this case
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-    init_db()
-    try:
-        yield
-    finally:
-        engine.dispose()
+    create_db_and_tables()
+    yield
 
-app = FastAPI(
-    title="Social Scheduler API",
-    version="0.0.0",
-    lifespan=lifespan,
-)
-
-@app.get("/")
-def default():
-    return {"message:" : "Head over to the health page!" }
+app = FastAPI(title="Social Scheduler" , lifespan = lifespan)
 
 app.include_router(health.router)
+app.include_router(profile.router)

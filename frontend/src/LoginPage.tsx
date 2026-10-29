@@ -1,6 +1,7 @@
-import './login.css';
+import './LoginPage.css';
 import {supabase} from './supabaseClient';
 import { useState } from "react";
+import { Link } from 'react-router';
 
 type AuthMode = "login" | "signup";
 
@@ -83,7 +84,7 @@ function LoginForm() {
             </div>
 
             <button type="submit" className="signup-button">
-              {mode === "login" ? "Log In" : "Create Account"}
+              <Link className='link' to='/Dash'> {mode === "login" ? "Log In" : "Create Account"} </Link>
             </button>
           </form>
         </section>

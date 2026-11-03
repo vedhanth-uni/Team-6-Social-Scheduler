@@ -7,6 +7,7 @@ import FindFriend from './components/FindFriend';
 import ImportButton from './components/ImportButton';
 import { createCalendarEvent } from './eventApi';
 import type { CalendarEvent } from './AddEventForm';
+import ProfilePopup from './components/ProfilePopup';
 
 function DashboardPage() {
     const currentMonth = new Date().toLocaleDateString('en-US', {
@@ -44,6 +45,7 @@ function DashboardPage() {
                         readOnly
                     />
                 </div>
+                <ProfilePopup/>
             </header>
 
             <div className='content'>
@@ -72,7 +74,7 @@ function DashboardPage() {
                         {/* Display the form only when the popup is open */}
                         {showEventForm && (
                             <AddEventForm
-                                onSave={() => setShowEventForm(false)}
+                                onSave={handleSaveEvent}
                                 onCancel={() => setShowEventForm(false)}
                             />
                         )}

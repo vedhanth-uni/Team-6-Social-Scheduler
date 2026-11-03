@@ -31,6 +31,8 @@ html, body {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
+    position: relative;
+    z-index: 10;
 }
 
 .content {
@@ -48,7 +50,12 @@ html, body {
 }
 
 .month-title {
-    display: flex;
+    flex-shrink: 1;
+    min-width: 0;
+}
+.month-title input {
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .calendar-container {

@@ -1,11 +1,105 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
 .default-text{
     font-size: large;
-    color: black;
+    color: var(--color-accent-dark);
+}
+
+:root {
+    --color-bg-light: #FFE6D0;
+    --color-bg-dark: #E8D0BC;
+    --color-accent-light:#6CC448;
+    --color-accent-dark: #392311;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+.dashboard {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.toolbar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.sidebar {
+    margin: 2px;
+    gap: 3px;
+    display: flex;
+    flex-direction: column;
+}
+
+.month-title {
+    display: flex;
+}
+
+.calendar-container {
+    flex: 1 1 0;
+    min-width: 0vw;
+    min-height: 0vh;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    margin-right: 2rem;
+    background-color: var(--color-bg-light);
+    border-radius: 2rem;
+}
+
+.canvas {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: repeat(10, minmax(0, 1fr));
+
+    width: 100%;
+    height: 100%;
+
+    background-image:
+    linear-gradient(to right, var(--color-accent-dark) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-accent-dark) 1px, transparent 1px);
+
+    background-size: 14.3% calc(100%/5);
+}
+
+.calendar-event {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-accent-light);
+    border-radius: 0.5rem;
+    border-color: #392311;
+    box-shadow: var(--color-accent-dark);
+    overflow: hidden;
+}
+
+.calendar-event p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.calendar-event h1 {
+    font-size: 1rem;
+    margin: 0;
 }
 
 .privacy-toggle-container{
+    display: flex;
     width: 180px;
     margin:20px;
 }
@@ -15,7 +109,7 @@
     flex-direction:column;
     gap: 8px;
     padding: 12px;
-    border: 3px solid #392311;
+    border: 3px solid var(--color-accent-dark);
     border-radius: 5px;
     background-color: transparent;
 }
@@ -27,7 +121,7 @@
     font-family: 'Instrument Sans';
     font-weight: 600;
     font-size: 20px;
-    color: #392311;
+    color: var(--color-accent-dark);
     cursor:pointer
 }
 .privacy-toggle-option input[type="radio"]{
@@ -35,9 +129,10 @@
     width: 29px;
     height: 29px;
     flex-shrink: 0;
-    border: 3px solid #392311;
+    border: 3px solid var(--color-accent-dark);
     border-radius: 5px;
     background-color: transparent;
+    accent-color: var(--color-accent-light);
     margin: 0;
     cursor: pointer;
 }
@@ -67,7 +162,7 @@
 #current-month{
     font-family: 'Instrument Sans';
     margin: 0;
-    color: #392311;
+    color: var(--color-accent-dark);
     font-size: 75px;
     background-color: transparent;
     border: none;
@@ -78,6 +173,7 @@
 }
 
 .view-container {
+    display: flex;
     position: relative;
     margin:10px 0 0 0;
     flex-shrink:0;
@@ -89,8 +185,8 @@
 }
 
 .view-button {
-    background-color: transparent;
-    color: #392311;
+    background-color: var(--color-accent-light);
+    color: var(--color-accent-dark);
     border: 3px solid #392311;
     border-radius: 5px;
     padding: 5px 15px;
@@ -117,8 +213,8 @@
     min-width: 100%;
     box-sizing: border-box;
     z-index: 100;
-    background-color: #FFE6D0;
     border-radius: 8px;
+    background-color: var(--color-accent-light);
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(57, 35, 17, 0.15);
 }
@@ -129,7 +225,7 @@
     box-sizing: border-box;
     padding: 9px 12px;
     background-color: transparent;
-    color: #392311;
+    color: var(--color-accent-dark);
     border: none;
     text-align: left;
     font-family: 'Instrument Sans';
@@ -138,5 +234,5 @@
 }
 
 .view-option:hover {
-    background-color: #F5CBA7;
+    background-color: var(--color-accent-light);
 }

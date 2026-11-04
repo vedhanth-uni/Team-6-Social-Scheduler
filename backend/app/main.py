@@ -11,6 +11,7 @@ from app import models  # noqa: F401  -- registers all tables before init_db() r
 from app.routers import health # this is how u call an endpoint file from the routers folder, so we're calling health.py in this case
 from app.routers import calendars
 from app.routers import events
+from app.routers import calendar_import
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -33,3 +34,4 @@ def default():
 app.include_router(health.router)
 app.include_router(calendars.router)
 app.include_router(events.router)
+app.include_router(calendar_import.router)

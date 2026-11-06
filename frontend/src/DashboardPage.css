@@ -43,7 +43,7 @@ html, body {
 }
 
 .sidebar {
-    margin: 2px;
+    margin: 10px;
     gap: 3px;
     display: flex;
     flex-direction: column;
@@ -70,29 +70,49 @@ html, body {
     border-radius: 2rem;
 }
 
-.canvas {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-template-rows: repeat(10, minmax(0, 1fr));
-
+.calendar {
     width: 100%;
     height: 100%;
 
-    background-image:
-    linear-gradient(to right, var(--color-accent-dark) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--color-accent-dark) 1px, transparent 1px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 
-    background-size: 14.3% calc(100%/5);
+.canvas {
+    padding: 1rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: repeat(24, 80px);
+}
+
+.hour-row {
+    display: flex;
+    border-top: 1px solid gray;
+    /* border-right: 1px solid gray; */
+}
+
+#first-row {
+    border-top: none;
+}
+
+.time-label {
+    padding: 2px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
 }
 
 .calendar-event {
+    position: absolute;
     width: 100%;
     height: 100%;
     background-color: var(--color-accent-light);
     border-radius: 0.5rem;
-    border-color: #392311;
+    border-style: solid;
+    border-color: #60a545;
     box-shadow: var(--color-accent-dark);
     overflow: hidden;
+    padding: 3px;
 }
 
 .calendar-event p {

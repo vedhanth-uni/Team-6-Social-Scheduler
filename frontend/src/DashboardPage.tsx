@@ -96,32 +96,72 @@ function DashboardPage() {
 //notice you need to filter why which radial button is chosen
 //def filter in another function, maybe in the same file as the one that gets the data from the database? but like what about caching?
 //when do we check again for data... probably when an event has been added or deleted so Ill have to make sure it doesn't do it too often
+
+//TODO: add function that translates the time to an attribute on the style component
+//TODO: make sure that event is on line exactly because YAY! confirmed line is exactly on grid lines
+
 function CalendarEvents() {
 
+    //practice data
     const events = [
-        {id: 1, x: 2, y: 3, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
-        {id: 2, x: 3, y: 4, title: "Partyyy", privacyTag: "Shared", location: "In the Bush"}, 
-        {id: 3, x: 1, y: 5, title: "Class", privacyTag: "Professional", location: "White House"}, 
+        {id: 1, weekday: 2, timeStart: 11.50, timeEnd: 12.30, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
+        {id: 2, weekday: 1, timeStart: 4, timeEnd: 5, title: "Partyyy", privacyTag: "Shared", location: "At My House"}, 
+        {id: 3, weekday: 4, timeStart: 3.45, timeEnd: 5.45, title: "Class", privacyTag: "Professional", location: "White House"}, 
     ]
+
+    //array from 2-24
+    const hours = Array.from({ length: 24 }, (_, i) => i+1);
+
+
+
+    //layer that allows row line styling and hours written on calendar
+    const labels = [];
+
+    for (let i = 1; i <= 7; i++) {
+        labels.push(
+            hours.map((hour) => (
+                    <div 
+                        className='hour-row' 
+                        id="first-row" key={1} 
+                        style={{ 
+                            gridColumnStart: i, 
+                            gridRowStart: hour, 
+                            borderRight: i === 7 ? 'none': '1px solid gray',
+                            borderTop: hour === 1 ? 'none': '1px solid gray'
+                    }}>
+                        <div className='time-label'>
+                            {hour}:00
+                        </div>
+                    </div>
+            ))
+        );
+    }
 
 
     return (
-        <div className='canvas'>
-            {events.map((event) => (
-                <div
-                key={event.id}
-                className='calendar-event'
-                style={{
-                    left: `${event.x}`,
-                    top: `${event.y}%`,
-                }}
-                >
-                    <h1> {event.title} </h1>
-                    <p> {event.location} </p>
-                </div>    
-            ))}
+        <div className='calendar'>
+            <div className='canvas'>
+                {labels}
+
+                {events.map((event) => (
+                    <div
+                    key={event.id}
+                    className='calendar-event'
+                    style={{
+                        gridColumnStart: `${event.weekday}`,
+                        gridColumnEnd: `${event.weekday + 1}`,
+                        height: "100px"
+                    }}
+                    >
+                        <h1> {event.title} </h1>
+                        <p> {event.location} </p>
+                    </div>    
+                ))}
+            </div>
         </div>
     )
 }
 
 export default DashboardPage;
+
+//recall JSX needs an expression, not a statement. 

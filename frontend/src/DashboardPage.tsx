@@ -8,16 +8,16 @@ import ImportButton from './components/ImportButton';
 import { createCalendarEvent } from './eventApi';
 import type { CalendarEvent } from './AddEventForm';
 import ProfilePopup from './components/ProfilePopup';
+import FriendsChecklist from './components/FriendsChecklist';
 
 function DashboardPage() {
     const currentMonth = new Date().toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
     });
-
     const calendarId = 1; //temporary calendar Id (replace with actual Id later)
     const [currentView, setCurrentView] = useState('Weekly');
-    const [selectedPrivacy, setSelectedPrivacy] = useState('Private');
+    const [selectedPrivacy, setSelectedPrivacy] = useState<string[]>([]);
 
     //tracks whether add event popup is open
     const [showEventForm, setShowEventForm] = useState(false);
@@ -59,6 +59,7 @@ function DashboardPage() {
                         selectedPrivacy = {selectedPrivacy} 
                         setSelectedPrivacy={setSelectedPrivacy}
                     />
+                    <FriendsChecklist/>
 
                     <FindFriend/>
                     <ImportButton/>
@@ -69,7 +70,7 @@ function DashboardPage() {
                             type="button"
                             onClick={() => setShowEventForm(true)}
                         >
-                            Add Event
+                            + Add Event
                         </button>
                         {/* Display the form only when the popup is open */}
                         {showEventForm && (
@@ -101,6 +102,22 @@ function DashboardPage() {
 //TODO: make sure that event is on line exactly because YAY! confirmed line is exactly on grid lines
 
 function CalendarEvents() {
+    const weekdays = [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+    ]; 
+
+    const [currDate] = useState(new Date()); //if we add a prev/next week buttons, we would need setCurrDate 
+    const weekDate = weekdays.map((_, i)=>{
+        const date = new Date(currDate);
+        date.setDate(date.getDate()-date.getDay()+i); //getDate gets day number, getDay gets weekday, + index updates the dates  
+        return date;
+    });
 
     //practice data
     const events = [
@@ -140,6 +157,11 @@ function CalendarEvents() {
 
     return (
         <div className='calendar'>
+            <div className = "week-header">
+                {weekdays.map((day, i)=>(
+                    <div className = "weekday" key={day}>{day} {weekDate[i].getDate()}</div> //displays the days of the week as a header 
+                ))}
+            </div>
             <div className='canvas'>
                 {labels}
 

@@ -136,9 +136,9 @@ html, body {
     flex-direction:column;
     gap: 8px;
     padding: 12px;
-    border: 3px solid var(--color-accent-dark);
-    border-radius: 5px;
-    background-color: transparent;
+    box-shadow: 3px 3px 8px rgba(57, 35, 17, 0.25);
+    border-radius: 20px;
+    background-color: var(--color-bg-light);
 }
 
 .privacy-toggle-option{
@@ -146,17 +146,17 @@ html, body {
     align-items:center;
     gap:8px;
     font-family: 'Instrument Sans';
-    font-weight: 600;
-    font-size: 20px;
+    font-weight: 400;
+    font-size:18px;
     color: var(--color-accent-dark);
     cursor:pointer
 }
-.privacy-toggle-option input[type="radio"]{
+.privacy-toggle-option input[type="checkbox"]{
     appearance: none;
     width: 29px;
     height: 29px;
     flex-shrink: 0;
-    border: 3px solid var(--color-accent-dark);
+    border: 2px solid var(--color-accent-dark);
     border-radius: 5px;
     background-color: transparent;
     accent-color: var(--color-accent-light);
@@ -164,12 +164,12 @@ html, body {
     cursor: pointer;
 }
 
-.privacy-toggle-option input[type="radio"]:checked {
+.privacy-toggle-option input[type="checkbox"]:checked {
     background-color: #6CC448;
     box-shadow: inset 0 0 0 5px #FFE6D0;
 }
 
-.privacy-toggle-option input[type="radio"]:focus-visible {
+.privacy-toggle-option input[type="checkbox"]:focus-visible {
     outline: 2px solid #6CC448;
     outline-offset: 3px;
 }
@@ -214,7 +214,8 @@ html, body {
 .view-button {
     background-color: var(--color-accent-light);
     color: var(--color-accent-dark);
-    border: 3px solid #392311;
+    border: none;
+    box-shadow: 3px 3px 8px rgba(57, 35, 17, 0.25);
     border-radius: 5px;
     padding: 5px 15px;
     min-width: 0;
@@ -262,4 +263,37 @@ html, body {
 
 .view-option:hover {
     background-color: var(--color-accent-light);
+}
+
+.week-header{
+    display: grid;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #392311;
+    grid-template-columns: repeat(7, 1fr );
+}
+
+.weekday{
+    padding: 5px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.add-class-button button{
+    background-color: var(--color-accent-light);
+    color: var(--color-accent-dark);
+    border: none;
+
+    border-radius:5px;
+    padding: 5px 5px;
+    min-width: 0;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: 'Instrument Sans';
+    font-weight: 600;
+    font-size: 25px;
+    cursor: pointer; 
+    box-shadow: 3px 3px 8px rgba(57, 35, 17, 0.25);
 }

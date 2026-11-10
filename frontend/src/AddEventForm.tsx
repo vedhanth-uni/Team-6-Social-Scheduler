@@ -1,4 +1,5 @@
 import { useState, type SubmitEvent  } from 'react';
+import './AddEventForm.css';
 //double check - should add event have visibility (public/private/professional for each event)?
 
 //information to be collected for one event

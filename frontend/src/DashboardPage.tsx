@@ -100,6 +100,7 @@ function DashboardPage() {
 
 //TODO: add function that translates the time to an attribute on the style component
 //TODO: make sure that event is on line exactly because YAY! confirmed line is exactly on grid lines
+//TODO: change to not military time lol
 
 function CalendarEvents() {
     const weekdays = [

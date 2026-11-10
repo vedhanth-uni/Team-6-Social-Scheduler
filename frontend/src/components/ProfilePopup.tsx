@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {UserRound} from 'lucide-react'; 
-import '../ProfilePopup.css';
+import './ProfilePopup.css';
+
 function ProfilePopup(){
     const [showProfile, setShowProfile] = useState(false);
     const username = 'User123'; //temp username & followers values, change later

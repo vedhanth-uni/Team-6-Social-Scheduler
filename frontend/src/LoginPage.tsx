@@ -9,6 +9,7 @@ type AuthMode = "login" | "signup";
 function LoginForm() {
   const [isSelected, setIsSelected] = useState<Boolean>(false);
   const [mode, setMode] = useState<AuthMode>("login");
+  const [message, setMessage] = useState<String>("Welcomeee!");
 
   //recall that this type for event might be wrong
   async function handleSubmit(e: React.SubmitEvent) {
@@ -29,11 +30,14 @@ function LoginForm() {
       });
 
       if(error) {
-        console.error('login failed:', error.message);
+        console.error('login failed: ', error.message);
+        setMessage("Login Failed: " + error.message); 
         return;
       }
 
+      setMessage("Login Successful!");
       console.log('Logged in user:', data.user);
+
     } else {
       const {data, error} = await supabase.auth.signUp({
         email,
@@ -42,12 +46,12 @@ function LoginForm() {
 
       if(error) {
         console.error('signup failed:', error.message);
+        setMessage("Signup Failed:" + error.message);
         return;
-      } else {
-        //tell them to check email for confirmation email
-      }
+      } 
 
       console.log('Signed up user:', data.user);
+      setMessage("Sign-up Successful! Please click the link in your email to create your account, and then login normally.");
     }
     
   }
@@ -56,7 +60,7 @@ function LoginForm() {
     <div>
       {isSelected ? (
         <section>
-          <p className="login-subtitle">Welcome!</p>
+          <p className="login-subtitle">{message}</p>
 
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="form-group">

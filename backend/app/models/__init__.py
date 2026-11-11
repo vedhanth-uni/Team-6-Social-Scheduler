@@ -4,6 +4,7 @@
 
 from app.models.calendar import Calendar, CalendarShare
 from app.models.event import Attendee, Event
+from app.models.friend import FriendRequest, Friendship
 from app.models.user import User
 
-__all__ = ["Attendee", "Calendar", "CalendarShare", "Event", "User"]
+__all__ = ["Attendee", "Calendar", "CalendarShare", "Event", "FriendRequest", "Friendship", "User"]

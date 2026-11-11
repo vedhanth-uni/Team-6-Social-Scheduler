@@ -171,14 +171,12 @@ def share_calendar(
     share = session.get(CalendarShare, (cal_id, target.id))
     if share:  # already shared -> update instead of duplicating (that's what the composite PK is for)
         share.permission = body.permission
-        share.relationship = body.relationship
         response.status_code = status.HTTP_200_OK
     else:
         share = CalendarShare(
             calendar_id=cal_id,
             user_id=target.id,
             permission=body.permission,
-            relationship=body.relationship,
         )
     session.add(share)
     session.commit()

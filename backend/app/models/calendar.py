@@ -28,5 +28,4 @@ class CalendarShare(SQLModel, table=True):
     calendar_id: int = Field(foreign_key="calendars.id", primary_key=True)
     user_id: int = Field(foreign_key="users.id", primary_key=True)  # person receiving access
     permission: str = "viewer"  # viewer | editor  -> what they can DO
-    relationship: str | None = None  # close_friend | friend | temp -> who they ARE to you
     created_at: datetime = Field(default_factory=utcnow)

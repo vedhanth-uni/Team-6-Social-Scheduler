@@ -12,6 +12,7 @@ from app.routers import health # this is how u call an endpoint file from the ro
 from app.routers import calendars
 from app.routers import events
 from app.routers import calendar_import
+from app.routers import friends
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -35,3 +36,4 @@ app.include_router(health.router)
 app.include_router(calendars.router)
 app.include_router(events.router)
 app.include_router(calendar_import.router)
+app.include_router(friends.router)

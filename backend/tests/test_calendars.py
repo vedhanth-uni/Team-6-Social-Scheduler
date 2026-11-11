@@ -103,7 +103,7 @@ def test_share_shows_up_in_list(client, users):
     alice, bob, _ = users
     cal = make_cal(client, alice)
     r = client.post(f"/calendars/{cal['id']}/shares",
-                    json={"email": "bob@umass.edu", "permission": "viewer", "relationship": "close_friend"},
+                    json={"email": "bob@umass.edu", "permission": "viewer"},
                     headers=h(alice))
     assert r.status_code == 201
     assert r.json()["user_id"] == bob.id

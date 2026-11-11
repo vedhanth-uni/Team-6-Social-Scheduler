@@ -4,7 +4,6 @@ from typing import Literal
 from sqlmodel import SQLModel
 
 Permission = Literal["viewer", "editor"]
-Relationship = Literal["close_friend", "friend", "temp"]
 
 
 class CalendarCreate(SQLModel):
@@ -38,7 +37,6 @@ class CalendarRead(SQLModel):
 class ShareCreate(SQLModel):
     email: str  # share by email -- that's what the frontend will have
     permission: Permission = "viewer"
-    relationship: Relationship | None = None
 
 
 class ShareRead(SQLModel):
@@ -47,5 +45,4 @@ class ShareRead(SQLModel):
     email: str
     display_name: str
     permission: Permission
-    relationship: Relationship | None
     created_at: datetime

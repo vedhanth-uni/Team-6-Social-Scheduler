@@ -130,11 +130,31 @@ html, body {
     margin: 0;
 }
 
+.friend-event{
+    width: 80%;
+    left:auto;
+    right:0;
+    border-style: solid;
+    border-color: #392311;
+
+}
+.friend-event p{
+    font-size: 1rem;
+    margin: 0;
+
+}
+
+.friend-event h1{
+    font-size: 1rem;
+    margin: 0;
+}
+
 .privacy-toggle-container{
     display: flex;
     width: 180px;
     margin:20px;
 }
+
 
 .privacy-toggle-box{
     display:flex;

@@ -169,9 +169,9 @@ function AddEventForm({ onSave, onCancel }: AddEventFormProps) {
                         setVisibility(event.target.value as CalendarEvent['visibility'])
                     }
                 >
-                <option value="public">Public</option>
-                <option value="private">Private</option>
-                <option value="professional">Professional</option>
+                <option value="public">Private</option>
+                <option value="private">Professional</option>
+                <option value="professional">Close</option>
                 </select>
             </div>
 

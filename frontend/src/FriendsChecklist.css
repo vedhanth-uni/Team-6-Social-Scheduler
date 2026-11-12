@@ -65,3 +65,12 @@
     top: -2px;
     left: 1px;
 }
+
+.friend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    flex-shrink: 0;
+}

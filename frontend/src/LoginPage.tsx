@@ -124,12 +124,14 @@ function LoginPage() {
               src="/green_logo.svg"
               className="green-logo"
             />
-            <img
+            <p className='logo-text'>
+              social <br/> calendar
+            </p>
+            {/* <img
               src="/social calendar.svg"
               className="logo-text"
-            />
+            /> */}
           </div>
-
       </div>
 
       <section className="login-container">

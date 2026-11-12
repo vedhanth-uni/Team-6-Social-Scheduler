@@ -73,10 +73,13 @@ body {
 
 .logo-text {
   position: absolute;
+  font-size: 48px;
+  font-weight: 1000;
+  line-height: .9;
   width: 90%;
   height: auto;
-  top: 25%;
-  left: 43%;
+  top: 19%;
+  left: 60%;
   transform: translate(-50%, -50%);
   z-index: 3;
 }

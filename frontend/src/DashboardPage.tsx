@@ -36,7 +36,11 @@ function DashboardPage() {
     return (
         <div className='dashboard'>
             <header className='toolbar'>
-                <h1>Social Calendar</h1>
+                {/* <h1>Social <br/> Calendar</h1> */}
+                <img
+                    src="/logo_small.svg"
+                    className="dash-logo"
+                />
                 <div className = "month-title">
                     <input
                         id ="current-month"
@@ -45,6 +49,8 @@ function DashboardPage() {
                         readOnly
                     />
                 </div>
+                <FindFriend/>
+                <ImportButton/>
                 <ProfilePopup/>
             </header>
 
@@ -60,9 +66,6 @@ function DashboardPage() {
                         setSelectedPrivacy={setSelectedPrivacy}
                     />
                     <FriendsChecklist/>
-
-                    <FindFriend/>
-                    <ImportButton/>
 
                     <div className='add-class-button'>
                         {/* Button to open the popup form for adding event */}
@@ -89,8 +92,6 @@ function DashboardPage() {
         </div>
     )
 }
-
-//TODO: add overlay for add event button to the calendar container.
 
 //TODO: create function that gets event data from database and translates it to coordinates.
 //you can then pass the events list as an arg to CalendarEvents()
@@ -122,13 +123,15 @@ function CalendarEvents() {
 
     //practice data
     const events = [
-        {id: 1, weekday: 2, timeStart: 11.50, timeEnd: 12.30, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
-        {id: 2, weekday: 1, timeStart: 4, timeEnd: 5, title: "Partyyy", privacyTag: "Shared", location: "At My House"}, 
-        {id: 3, weekday: 4, timeStart: 3.45, timeEnd: 5.45, title: "Class", privacyTag: "Professional", location: "White House"}, 
+        {id: 1, weekday: 2, timeStartPixels: 30, timeLengthPixels: 90, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
+        {id: 2, weekday: 1, timeStartPixels: 1140, timeLengthPixels: 180, title: "Partyyy", privacyTag: "Shared", location: "At My House"}, 
+        {id: 3, weekday: 4, timeStartPixels: 885, timeLengthPixels: 50, title: "Class", privacyTag: "Professional", location: "White House"}, 
     ]
 
     //array from 2-24
     const hours = Array.from({ length: 24 }, (_, i) => i+1);
+    const hourLabels = ["1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM", "12PM", 
+        "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM", "12AM"];
 
 
 
@@ -140,7 +143,8 @@ function CalendarEvents() {
             hours.map((hour) => (
                     <div 
                         className='hour-row' 
-                        id="first-row" key={1} 
+                        id="first-row" 
+                        key={1} 
                         style={{ 
                             gridColumnStart: i, 
                             gridRowStart: hour, 
@@ -148,7 +152,7 @@ function CalendarEvents() {
                             borderTop: hour === 1 ? 'none': '1px solid gray'
                     }}>
                         <div className='time-label'>
-                            {hour}:00
+                            {hourLabels[hour-1]} 
                         </div>
                     </div>
             ))
@@ -173,7 +177,8 @@ function CalendarEvents() {
                     style={{
                         gridColumnStart: `${event.weekday}`,
                         gridColumnEnd: `${event.weekday + 1}`,
-                        height: "100px"
+                        top: `${event.timeStartPixels}px`,
+                        height: `${event.timeLengthPixels}px`
                     }}
                     >
                         <h1> {event.title} </h1>
@@ -184,6 +189,8 @@ function CalendarEvents() {
         </div>
     )
 }
+
+
 
 export default DashboardPage;
 

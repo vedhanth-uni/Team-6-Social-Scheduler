@@ -15,7 +15,7 @@
 }
 
 .event-modal{
-    background-color: rgba(255, 255, 255, 0.30);
+    background-color: rgba(252, 247, 235, 0.75);
     backdrop-filter: blur(0.5px);
     color: #392311;
     width: 600px;
@@ -101,9 +101,8 @@
     background-color: rgba(108, 196, 72, 0.75);
     color: #392311;
     border: 1px solid #392311;
-    
+    margin-bottom: 20px;
 }
-
 
 
 .event-form-buttons button[type="submit"]:hover {

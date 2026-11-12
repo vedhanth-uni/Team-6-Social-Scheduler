@@ -42,6 +42,13 @@ html, body {
     min-height: 0;
 }
 
+.dash-logo {
+    margin-left: 3rem;
+    margin-right: 3rem;
+    width: 7rem;
+    height: 7rem;
+}
+
 .sidebar {
     margin: 10px;
     gap: 3px;
@@ -68,6 +75,7 @@ html, body {
     margin-right: 2rem;
     background-color: var(--color-bg-light);
     border-radius: 2rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
 }
 
 .calendar {
@@ -83,7 +91,7 @@ html, body {
     position: relative;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    grid-template-rows: repeat(24, 80px);
+    grid-template-rows: repeat(24, 60px);
 }
 
 .hour-row {
@@ -102,8 +110,7 @@ html, body {
 
 .calendar-event {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 85%;
     background-color: var(--color-accent-light);
     border-radius: 0.5rem;
     border-style: solid;
@@ -223,8 +230,9 @@ html, body {
     justify-content: flex-start;
     font-family: 'Instrument Sans';
     font-weight: 600;
-    font-size: 30px;
+    font-size: 25px;
     cursor: pointer;
+    margin-left: 20px;
 }
 
 .dropdown-arrow{
@@ -283,7 +291,8 @@ html, body {
     border: none;
 
     border-radius:5px;
-    padding: 5px 5px;
+    padding: 9px 9px;
+    margin-left: 20px;
     min-width: 0;
     display: flex;
     gap: 5px;

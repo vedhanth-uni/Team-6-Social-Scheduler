@@ -1,0 +1,116 @@
+.event-modal-backdrop{
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0,4); 
+    
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    z-index:1000;
+
+
+}
+
+.event-modal{
+    background-color: rgba(255, 255, 255, 0.30);
+    backdrop-filter: blur(0.5px);
+    color: #392311;
+    width: 600px;
+    max-width: 90%;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 20 30px;
+    border-radius: 15px;
+    border: 1px solid #392311;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    transform: translate(120px, 80px);
+}
+
+.event-modal h2{
+    color: #392311;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(57, 35, 17, 0.2);
+    background-color: rgba(108, 196, 72, 0.75);
+    border-radius: 8px;
+
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    padding-right: 10px;
+  
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    color: #392311;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 10px;
+    border: 1px solid rgba(57, 35, 17, 0.3);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #392311;
+    font-size: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border: 1px solid #392311;
+    box-shadow: 0 0 4px rgba(57, 35, 17, 0.2);
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    accent-color: #6CC448;
+}
+
+.event-form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.event-form-buttons button {
+    padding: 10px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: rgba(108, 196, 72, 0.75);
+    color: #392311;
+    border: 1px solid #392311;
+    
+}
+
+
+
+.event-form-buttons button[type="submit"]:hover {
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+
+.event-form-buttons button[type="button"]:hover {
+    background-color: rgba(255, 255, 255, 0.75);
+}

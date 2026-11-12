@@ -1,0 +1,67 @@
+.friends-checklist-container{
+    display: flex;
+    width: 180px;
+    margin:20px;
+    margin-top:1px;
+}
+
+.friends-checklist-box{
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+    padding:15px 12px;
+
+    border-radius: 20px;
+    height: 200px;
+    overflow-y:auto;
+    width:280px;
+    background-color: #FFE6D0;
+    box-shadow: 3px 3px 8px rgba(57, 35, 17, 0.25);
+}
+
+.friends-checklist-box h3{
+    font-family: 'Instrument Sans';
+    font-weight: 600;
+    font-size: 20px;
+    color: #392311;
+    margin: 0 0 5px 0;
+}
+
+.friends-option{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Instrument Sans';
+    font-weight: 200;
+    font-size: 18px;
+    color: #392311;
+    cursor: pointer; 
+}
+
+.friends-option input[type = "checkbox"]{
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 2px solid #392311;
+    border-radius: 3px;
+    background-color: transparent;
+    margin:0;
+    cursor: pointer; 
+    position: relative;
+
+}
+
+.friends-option input[type ="checkbox"]:checked{
+    background-color: #6CC448;
+}
+
+.friends-option input[type="checkbox"]:checked::after{
+    content: "✓";
+    color: #392311;
+    font-size: 13px;
+    font-weight: bold;
+    position: absolute;
+    top: -2px;
+    left: 1px;
+}

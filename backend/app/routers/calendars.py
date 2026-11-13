@@ -9,9 +9,10 @@
 
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session, select
 
+from app.auth import current_user
 from app.database import get_session
 from app.models.calendar import Calendar, CalendarShare
 from app.models.timeutil import utcnow
@@ -31,16 +32,6 @@ RANK = {"viewer": 1, "editor": 2, "owner": 3}
 
 
 # ---------- helpers ----------
-
-def current_user(
-    x_user_id: int = Header(description="TEMP: stand-in for auth until Firebase is wired up"),
-    session: Session = Depends(get_session),
-) -> User:
-    user = session.get(User, x_user_id)
-    if user is None or user.deleted_at is not None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unknown user")
-    return user
-
 
 def access_level(cal: Calendar, user_id: int, session: Session) -> Access | None:
     if cal.owner_id == user_id:

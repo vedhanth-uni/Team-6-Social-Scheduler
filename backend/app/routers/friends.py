@@ -26,12 +26,12 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
+from app.auth import current_user
 from app.config import settings
 from app.database import get_session
 from app.models.friend import FriendRequest, Friendship, pair
 from app.models.timeutil import utcnow
 from app.models.user import User
-from app.routers.calendars import current_user
 from app.schemas.friend import (
     FriendRead,
     FriendRequestCreate,

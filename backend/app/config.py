@@ -23,6 +23,22 @@ class Settings:
 
     FRIEND_REQUEST_TTL_DAYS: int = int(os.getenv("FRIEND_REQUEST_TTL_DAYS", "7"))
 
+    # --- supabase auth (see app/auth.py) ---
+    # the project url, same value as VITE_SUPABASE_URL in the frontend
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+    # only for older projects that still sign tokens with a shared secret (HS256). leave blank otherwise.
+    SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "").strip()
+    SUPABASE_JWT_AUDIENCE: str = os.getenv("SUPABASE_JWT_AUDIENCE", "authenticated").strip()
+
+    # browsers only let the frontend call this api from origins listed here (comma separated).
+    # defaults to FRONTEND_URL.
+    CORS_ORIGINS: list[str] = [o.strip().rstrip("/") for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()] or [FRONTEND_URL]
+
+    @property
+    def issuer(self) -> str:
+        # the "iss" claim of every token supabase issues for this project
+        return f"{self.SUPABASE_URL}/auth/v1"
+
     @property
     def gmail_enabled(self) -> bool:
         return bool(self.GMAIL_ADDRESS and self.GMAIL_APP_PASSWORD)

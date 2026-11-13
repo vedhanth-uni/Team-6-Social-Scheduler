@@ -10,10 +10,11 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlmodel import Session, select
 
+from app.auth import current_user
 from app.database import get_session
 from app.models.event import Event
 from app.models.user import User
-from app.routers.calendars import current_user, load_calendar
+from app.routers.calendars import load_calendar
 from app.routers.events import create_event, resolve_times, validate_rrule
 from app.schemas.event import Visibility
 from app.schemas.ics_import import ImportIssue, ImportResult

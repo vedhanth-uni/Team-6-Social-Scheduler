@@ -17,6 +17,7 @@ from app.main import app
 from app.models.friend import FriendRequest
 from app.models.timeutil import utcnow
 from app.models.user import User
+from tests.auth_helpers import auth_headers
 from app.services import email as email_service
 
 
@@ -49,16 +50,15 @@ def client(session, outbox):
 
 @pytest.fixture
 def users(session):
-    alice = User(email="alice@umass.edu", display_name="Alice")
-    bob = User(email="bob@umass.edu", display_name="Bob")
-    carol = User(email="carol@umass.edu", display_name="Carol")
+    alice = User(auth_id="auth-alice", email="alice@umass.edu", display_name="Alice")
+    bob = User(auth_id="auth-bob", email="bob@umass.edu", display_name="Bob")
+    carol = User(auth_id="auth-carol", email="carol@umass.edu", display_name="Carol")
     session.add_all([alice, bob, carol])
     session.commit()
     return alice, bob, carol
 
 
-def h(user):
-    return {"X-User-Id": str(user.id)}
+h = auth_headers  # a real signed Supabase-style token for that user
 
 
 def send(client, frm, to, level="close"):
@@ -291,8 +291,8 @@ def test_email_failure_does_not_break_request(client, users, monkeypatch):
 
 
 def test_display_name_is_escaped_in_html_email(client, session, outbox):
-    evil = User(email="evil@umass.edu", display_name="<script>x</script>")
-    bob = User(email="bob@umass.edu", display_name="Bob")
+    evil = User(auth_id="auth-evil", email="evil@umass.edu", display_name="<script>x</script>")
+    bob = User(auth_id="auth-bob", email="bob@umass.edu", display_name="Bob")
     session.add_all([evil, bob])
     session.commit()
     send(client, evil, bob)

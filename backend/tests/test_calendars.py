@@ -11,6 +11,7 @@ from app import models  # noqa: F401  (registers tables)
 from app.database import get_session
 from app.main import app
 from app.models.user import User
+from tests.auth_helpers import auth_headers
 
 
 @pytest.fixture
@@ -39,16 +40,15 @@ def client(session):
 
 @pytest.fixture
 def users(session):
-    alice = User(email="alice@umass.edu", display_name="Alice")
-    bob = User(email="bob@umass.edu", display_name="Bob")
-    carol = User(email="carol@umass.edu", display_name="Carol")
+    alice = User(auth_id="auth-alice", email="alice@umass.edu", display_name="Alice")
+    bob = User(auth_id="auth-bob", email="bob@umass.edu", display_name="Bob")
+    carol = User(auth_id="auth-carol", email="carol@umass.edu", display_name="Carol")
     session.add_all([alice, bob, carol])
     session.commit()
     return alice, bob, carol
 
 
-def h(user):
-    return {"X-User-Id": str(user.id)}
+h = auth_headers  # a real signed Supabase-style token for that user
 
 
 def make_cal(client, user, name="Classes"):
@@ -69,8 +69,8 @@ def test_create_and_first_is_primary(client, users):
     assert first["my_access"] == "owner"
 
 
-def test_unknown_user_rejected(client, users):
-    r = client.post("/calendars", json={"name": "x"}, headers={"X-User-Id": "999"})
+def test_missing_token_rejected(client, users):
+    r = client.post("/calendars", json={"name": "x"})
     assert r.status_code == 401
 
 

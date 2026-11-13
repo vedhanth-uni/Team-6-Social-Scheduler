@@ -8,12 +8,12 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlmodel import Session, select
 
+from app.auth import current_user
 from app.database import get_session
 from app.models.calendar import Calendar, CalendarShare
 from app.models.event import Attendee, Event
 from app.models.timeutil import utcnow
 from app.models.user import User
-from app.routers.calendars import current_user
 from app.schemas.event import EventCreate, EventRead, EventUpdate, Occurrence
 from app.services import recurrence
 

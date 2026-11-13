@@ -1,55 +1,49 @@
 import './LoginPage.css';
 import {supabase} from './supabaseClient';
 import { useState } from "react";
-import { Link } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
+import { useAuth } from './auth/useAuth';
 
 type AuthMode = "login" | "signup";
 
 
 function LoginForm() {
-  const [isSelected, setIsSelected] = useState<Boolean>(false);
+  const [isSelected, setIsSelected] = useState<boolean>(false);
   const [mode, setMode] = useState<AuthMode>("login");
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  //recall that this type for event might be wrong
-  async function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     //prevent browser from reloading the page
     e.preventDefault();
 
-    //read form data
-    const form = e.target;
-    const formData = new FormData(form);
-    
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    //read form data (FormData.get can return null or a File, so only accept strings)
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email');
+    const password = formData.get('password');
+    if (typeof email !== 'string' || typeof password !== 'string') return;
 
+    setError(null);
+    setNotice(null);
+    setSubmitting(true);
+
+    // We don't navigate here. When login succeeds Supabase announces it, AuthProvider updates,
+    // and LoginPage (below) redirects to the dashboard. A failed login can never get past this page.
     if (mode === "login") {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if(error) {
-        console.error('login failed:', error.message);
-        return;
-      }
-
-      console.log('Logged in user:', data.user);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setError(error.message);
     } else {
-      const {data, error} = await supabase.auth.signUp({
-        email,
-        password
-      });
-
-      if(error) {
-        console.error('signup failed:', error.message);
-        return;
-      } else {
-        //tell them to check email for confirmation email
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        setError(error.message);
+      } else if (!data.session) {
+        // email confirmation is on: no session until they click the link we just emailed
+        setNotice("Check your email to confirm your account, then log in.");
+        setMode("login");
       }
-
-      console.log('Signed up user:', data.user);
     }
-    
+    setSubmitting(false);
   }
 
   return (
@@ -78,13 +72,16 @@ function LoginForm() {
                 name="password"
                 type="password"
                 placeholder="Enter your password"
-                autoComplete="current-password"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
               />
             </div>
 
-            <button type="submit" className="signup-button">
-              <Link className='link' to='/Dash'> {mode === "login" ? "Log In" : "Create Account"} </Link>
+            {error && <p role="alert">{error}</p>}
+            {notice && <p role="status">{notice}</p>}
+
+            <button type="submit" className="signup-button" disabled={submitting}>
+              {mode === "login" ? "Log In" : "Create Account"}
             </button>
           </form>
         </section>
@@ -108,6 +105,17 @@ function LoginForm() {
 }
 
 function LoginPage() {
+  const { session, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) return <p role="status">Loading…</p>;
+  if (session) {
+    // send them where they were headed before being asked to log in (set by RequireAuth)
+    const from = location.state?.from;
+    const to = from ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}` : '/Dash';
+    return <Navigate to={to} replace />;
+  }
+
   return (
     <main className="login-page">
       <div className = "logo-container">
@@ -136,7 +144,6 @@ function LoginPage() {
 }
 
 
-//TODO: validate if form data is string, since FormData is a built-in browser api st .get can return null
 //TODO: show text to user that confirms button clicked/signup/login
 
 export default LoginPage;

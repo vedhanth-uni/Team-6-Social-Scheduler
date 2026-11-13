@@ -1,11 +1,11 @@
 import './DashboardPage.css';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import ViewDropdown from './components/ViewDropdown';
 import PrivacyToggle from './components/PrivacyToggle';
 import AddEventForm from './AddEventForm';
 import FindFriend from './components/FindFriend';
 import ImportButton from './components/ImportButton';
-import { createCalendarEvent } from './eventApi';
+import { createCalendarEvent, getPrimaryCalendar } from './eventApi';
 import type { CalendarEvent } from './AddEventForm';
 import ProfilePopup from './components/ProfilePopup';
 import FriendsChecklist from './components/FriendsChecklist';
@@ -15,7 +15,9 @@ function DashboardPage() {
         month: 'long',
         year: 'numeric'
     });
-    const calendarId = 1; //temporary calendar Id (replace with actual Id later)
+    //the logged-in user's own calendar, loaded from the backend (null until it arrives)
+    const [calendarId, setCalendarId] = useState<number | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [currentView, setCurrentView] = useState('Weekly');
     const [selectedPrivacy, setSelectedPrivacy] = useState<string[]>([]);
 
@@ -23,7 +25,14 @@ function DashboardPage() {
     const [showEventForm, setShowEventForm] = useState(false);
 
 
+    useEffect(() => {
+        getPrimaryCalendar()
+            .then((cal) => setCalendarId(cal.id))
+            .catch((error: Error) => setLoadError(error.message));
+    }, []);
+
     async function handleSaveEvent(event: CalendarEvent){
+        if (calendarId === null) return;
         try{
             await createCalendarEvent(calendarId, event);
             setShowEventForm(false);
@@ -47,6 +56,7 @@ function DashboardPage() {
                 </div>
                 <ProfilePopup/>
             </header>
+            {loadError && <p role="alert">Could not load your calendar: {loadError}</p>}
 
             <div className='content'>
                 <aside className='sidebar'>

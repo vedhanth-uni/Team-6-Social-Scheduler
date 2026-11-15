@@ -1,26 +1,18 @@
 import { useState } from "react";
 import '../FriendsChecklist.css';
+import type { Friend } from "../friendsApi";
 
 
 type FriendsChecklistProps ={
+    friends: Friend[];
     //the selected friends from the checklist
-    onSelectionChange: (friendIds: number[])=>void;
+    onSelectionChange: (friendIds: string[])=>void;
 }
 
-export const friends = [ //temporary data, use actual data from backend later 
-        {id: 1, name:"Daniela", color: "#F4A6A6", borderColor: "#D98282" },
-        {id: 2, name: "John", color: "#B5D6A7", borderColor: "#7EAB6A"},
-        {id:3, name: "Manasi", color: "#D2B5E8", borderColor: "#AB93BD"},
-        {id: 4, name: "Misha", color: "#A6C8F4", borderColor: "#84A0C4"},
-        {id: 5, name:"Naysa", color: "#E9B949", borderColor: "#C7962F"},
-        {id: 6, name: "Vedhanth", color: "#A6D9D1", borderColor:"#86B0AA" }
-
-    ];
-
-function FriendsChecklist({onSelectionChange}:FriendsChecklistProps){
-    const [selectedFriends, setSelectedFriends] = useState<number[]>([]); //stores the selected friends, based on Id, starts off as an empty array since no friends are selected in the beginning
-    const selectFunc = (friendId: number)=>{
-        let updatedFriends: number[]; //this holds the updates list of friend Ids
+function FriendsChecklist({friends, onSelectionChange}:FriendsChecklistProps){
+    const [selectedFriends, setSelectedFriends] = useState<string[]>([]); //stores the selected friends, based on Id, starts off as an empty array since no friends are selected in the beginning
+    const selectFunc = (friendId: string)=>{
+        let updatedFriends: string[]; //this holds the updates list of friend Ids
         if(selectedFriends.includes(friendId)){ //first check if that friends have been selected alr
             updatedFriends = selectedFriends.filter((id) => id !== friendId); //remove a friend if they're already selected
         }
@@ -37,6 +29,7 @@ function FriendsChecklist({onSelectionChange}:FriendsChecklistProps){
         <div className = "friends-checklist-box">
             <h3>Friends</h3>
             <div className = "friends-list">
+                {friends.length === 0 && <p style = {{margin: 0, opacity: 0.7}}>No friends yet</p>}
                 {friends.map((friend)=>(
                     <label className = "friends-option" key = {friend.id}>
                         <input 

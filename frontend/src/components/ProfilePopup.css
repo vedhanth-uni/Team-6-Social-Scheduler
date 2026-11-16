@@ -1,0 +1,50 @@
+.profile-icon{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+
+    background-color:  #FFE6D0;
+    color: #392311;
+    cursor:pointer;
+    border:2px solid #392311;
+}
+
+.profile-container {
+    margin-left: auto;
+    margin-right:45px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+.profile-popup {
+    position: absolute;
+    top: 82px;
+    right: 0;
+    width: 200px;
+    padding: 18px;
+    background-color: #FFE6D0;
+    color: #392311;
+    border: 2px solid #392311;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(57, 35, 17, 0.2);
+
+    z-index: 200;
+}
+
+.profile-popup h3 {
+    font-family: 'Instrument Sans';
+    font-size: 20px;
+    margin: 0 0 8px;
+}
+
+.profile-popup p {
+    font-family: 'Instrument Sans';
+    font-size: 15px;
+    margin: 0;
+    font-weight: normal;
+}

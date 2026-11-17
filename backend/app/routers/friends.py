@@ -1,260 +1,258 @@
+# friend requests + friends list, on the friendships table
+#
+#   POST   /friend-requests                    send one by username (emails the other person)
+#   GET    /friend-requests?direction=...      my pending incoming / outgoing requests
+#   POST   /friend-requests/{id}/accept        accept
+#   POST   /friend-requests/{id}/decline       decline, deletes the row
+#   DELETE /friend-requests/{id}               sender cancels their pending request
+#   POST   /friend-requests/lookup             what an email link is for (frontend landing page)
+#   POST   /friend-requests/respond            accept/decline from the email link
+#   GET    /friends                            my friends + level
+#   DELETE /friends/{profile_id}               unfriend, works from either side
+#
+# one row per pair. pending turns into accepted, declining or unfriending deletes the row.
+# to change the level you unfriend and send a new request.
+
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session, and_, col, or_, select
+from sqlmodel import Session, select
 
-from app.auth import get_current_user_id
+from app.auth_profile import current_profile
 from app.database import get_session
-from app.mocks import fetch_user_events, send_friend_request_email
-from app.models.friendships import (
-    LEVEL_CLOSE,
-    STATUS_ACCEPTED,
-    STATUS_PENDING,
-    Friendship,
-)
+from app.models.friendships import STATUS_ACCEPTED, STATUS_PENDING, Friendship
 from app.models.profile import Profile
-from app.schemas.event import EventOut
-from app.schemas.friends import (
-    FriendLevelUpdate,
-    FriendOut,
+from app.models.profile_email import ProfileEmail
+from app.schemas.friend import (
+    FriendRead,
     FriendRequestCreate,
-    FriendRequestOut,
-    FriendsOverview,
+    FriendRequestRead,
+    LookupBody,
+    ProfileBrief,
+    RespondBody,
 )
-from app.schemas.profile import ProfilePublic
+from app.services.email import send_email
+from app.services.friend_emails import friend_request_email, request_accepted_email
 
-router = APIRouter(prefix="/friends", tags=["friends"])
+router = APIRouter(tags=["Friends"])
 
 
-# ---------- helpers ----------
+def brief(p: Profile) -> ProfileBrief:
+    return ProfileBrief(id=p.id, username=p.username, display_name=p.display_name)
 
-def get_row_between(session: Session, a: uuid.UUID, b: uuid.UUID) -> Friendship | None:
-    """The row linking two users, whichever of them is sender or receiver."""
+
+def to_read(row: Friendship, session: Session, status_override: str | None = None) -> FriendRequestRead:
+    return FriendRequestRead(
+        id=row.id,
+        level=row.level,
+        status=status_override or row.status,
+        sender=brief(session.get(Profile, row.sender_id)),
+        recipient=brief(session.get(Profile, row.reciever_id)),
+        created_at=row.created_at,
+    )
+
+
+def email_of(profile_id: uuid.UUID, session: Session) -> str | None:
+    row = session.get(ProfileEmail, profile_id)
+    return row.email if row else None
+
+
+def row_between(a: uuid.UUID, b: uuid.UUID, session: Session) -> Friendship | None:
     return session.exec(
         select(Friendship).where(
             or_(
-                and_(Friendship.sender_id == a, Friendship.receiver_id == b),
-                and_(Friendship.sender_id == b, Friendship.receiver_id == a),
+                (Friendship.sender_id == a) & (Friendship.reciever_id == b),
+                (Friendship.sender_id == b) & (Friendship.reciever_id == a),
             )
         )
     ).first()
 
 
-def get_accepted_friendship(session: Session, me: uuid.UUID, friend_id: uuid.UUID) -> Friendship:
-    row = get_row_between(session, me, friend_id)
-    if row is None or row.status != STATUS_ACCEPTED:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not friends with this user")
+def load_incoming(req_id: int, me: Profile, session: Session) -> Friendship:
+    row = session.get(Friendship, req_id)
+    if row is None or row.reciever_id != me.id or row.status != STATUS_PENDING:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Friend request not found")
     return row
 
 
-def other_id(row: Friendship, me: uuid.UUID) -> uuid.UUID:
-    return row.receiver_id if row.sender_id == me else row.sender_id
-
-
-def load_profiles(session: Session, ids: set[uuid.UUID]) -> dict[uuid.UUID, Profile]:
-    if not ids:
-        return {}
-    profiles = session.exec(select(Profile).where(col(Profile.id).in_(list(ids)))).all()
-    return {p.id: p for p in profiles}
-
-
-def hide_private_details(events: list[EventOut]) -> list[EventOut]:
-    """Regular friends see private events as anonymous 'busy' blocks."""
-    return [
-        e.model_copy(update={"title": None, "details_hidden": True}) if e.is_private else e
-        for e in events
-    ]
-
-
-# ---------- 1. overview: friends + count + pending requests ----------
-
-@router.get("", response_model=FriendsOverview)
-def get_friends_overview(
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
-):
-    rows = session.exec(
-        select(Friendship)
-        .where(or_(Friendship.sender_id == user_id, Friendship.receiver_id == user_id))
-        .order_by(col(Friendship.created_at).desc())
-    ).all()
-
-    profiles = load_profiles(session, {other_id(r, user_id) for r in rows})
-
-    friends: list[FriendOut] = []
-    incoming: list[FriendRequestOut] = []
-    outgoing: list[FriendRequestOut] = []
-
-    for row in rows:
-        other = profiles.get(other_id(row, user_id))
-        if other is None:  # shouldn't happen thanks to the foreign keys
-            continue
-        public = ProfilePublic.model_validate(other)
-        if row.status == STATUS_ACCEPTED:
-            friends.append(FriendOut(friend=public, level=row.level))
-        else:
-            item = FriendRequestOut(
-                id=row.id, user=public, status=row.status, created_at=row.created_at
-            )
-            (incoming if row.receiver_id == user_id else outgoing).append(item)
-
-    friends.sort(key=lambda f: f.friend.username)
-    return FriendsOverview(
-        friend_count=len(friends),
-        friends=friends,
-        incoming_requests=incoming,
-        outgoing_requests=outgoing,
-    )
-
-
-# ---------- send request (not on your list, but needed to test the rest) ----------
-
-@router.post("/requests", response_model=FriendRequestOut, status_code=status.HTTP_201_CREATED)
-def send_friend_request(
-    data: FriendRequestCreate,
-    background_tasks: BackgroundTasks,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
-):
-    if data.receiver_id == user_id:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "You can't send a request to yourself")
-
-    sender = session.get(Profile, user_id)
-    if sender is None:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Create your profile first")
-
-    receiver = session.get(Profile, data.receiver_id)
-    if receiver is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
-
-    existing = get_row_between(session, user_id, data.receiver_id)
-    if existing is not None:
-        if existing.status == STATUS_ACCEPTED:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Already friends")
-        if existing.sender_id == user_id:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Request already sent")
-        # They already asked me, so sending one back means "yes": accept theirs.
-        existing.status = STATUS_ACCEPTED
-        session.add(existing)
-        session.commit()
-        session.refresh(existing)
-        return FriendRequestOut(
-            id=existing.id,
-            user=ProfilePublic.model_validate(receiver),
-            status=existing.status,
-            created_at=existing.created_at,
-        )
-
-    row = Friendship(sender_id=user_id, receiver_id=data.receiver_id)
-    session.add(row)
+def parse_link_id(token: str) -> int:
     try:
+        return int(token)
+    except ValueError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This link is invalid")
+
+
+def respond(row: Friendship, me: Profile, action: Literal["accept", "decline"],
+            session: Session, background: BackgroundTasks) -> FriendRequestRead:
+    if action == "decline":
+        out = to_read(row, session, "declined")
+        session.delete(row)
         session.commit()
-    except IntegrityError:  # two simultaneous sends hit the unique constraint
-        session.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT, "Request already exists")
-    session.refresh(row)
-
-    # Runs after the response is sent, so email problems never fail the request.
-    background_tasks.add_task(
-        send_friend_request_email,
-        receiver_id=data.receiver_id,
-        sender_username=sender.username,
-    )
-    return FriendRequestOut(
-        id=row.id,
-        user=ProfilePublic.model_validate(receiver),
-        status=row.status,
-        created_at=row.created_at,
-    )
-
-
-# ---------- 5. accept ----------
-
-@router.post("/requests/{request_id}/accept", response_model=FriendOut)
-def accept_friend_request(
-    request_id: int,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
-):
-    row = session.get(Friendship, request_id)
-    # 404 (not 403) when it isn't yours, so we don't reveal that the row exists.
-    if row is None or row.receiver_id != user_id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found")
-    if row.status != STATUS_PENDING:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Request was already accepted")
+        return out
 
     row.status = STATUS_ACCEPTED
     session.add(row)
     session.commit()
     session.refresh(row)
 
-    sender = session.get(Profile, row.sender_id)
-    return FriendOut(friend=ProfilePublic.model_validate(sender), level=row.level)
+    to = email_of(row.sender_id, session)
+    if to:
+        background.add_task(send_email, request_accepted_email(
+            to=to, accepter_name=me.display_name, level=row.level,
+        ))
+    return to_read(row, session)
 
 
-# ---------- 3. reject (receiver) or cancel (sender) ----------
-
-@router.delete("/requests/{request_id}", status_code=status.HTTP_204_NO_CONTENT)
-def reject_or_cancel_request(
-    request_id: int,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+@router.post("/friend-requests", response_model=FriendRequestRead, status_code=status.HTTP_201_CREATED)
+def send_request(
+    body: FriendRequestCreate,
+    background: BackgroundTasks,
+    me: Profile = Depends(current_profile),
     session: Session = Depends(get_session),
 ):
-    row = session.get(Friendship, request_id)
-    if row is None or user_id not in (row.sender_id, row.receiver_id):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found")
-    if row.status != STATUS_PENDING:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Already friends. Remove the friend instead")
+    target = session.exec(select(Profile).where(Profile.username == body.username)).first()
+    if target is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No user with that username")
+    if target.id == me.id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "You can't send a friend request to yourself")
 
-    session.delete(row)
-    session.commit()
+    existing = row_between(me.id, target.id, session)
+    if existing and existing.status == STATUS_ACCEPTED:
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            "You're already friends. To change the level, remove them and send a new request.")
+    if existing and existing.sender_id == me.id:
+        raise HTTPException(status.HTTP_409_CONFLICT, "You already sent them a request")
+    if existing:
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            f"{target.display_name} already sent you a request. Accept or decline that one instead.")
 
-
-# ---------- 2. remove friend ----------
-
-@router.delete("/{friend_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_friend(
-    friend_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
-):
-    row = get_accepted_friendship(session, user_id, friend_id)
-    session.delete(row)
-    session.commit()
-
-
-# ---------- 6. update relationship ----------
-
-@router.patch("/{friend_id}/level", response_model=FriendOut)
-def update_friend_level(
-    friend_id: uuid.UUID,
-    data: FriendLevelUpdate,
-    user_id: uuid.UUID = Depends(get_current_user_id),
-    session: Session = Depends(get_session),
-):
-    # TODO: levels are mutual, and "close" exposes private events in BOTH directions.
-    # Once the team decides on consent, make this a request the other person must confirm.
-    row = get_accepted_friendship(session, user_id, friend_id)
-    row.level = data.level
+    row = Friendship(sender_id=me.id, reciever_id=target.id, level=body.level)
     session.add(row)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "You already sent them a request")
     session.refresh(row)
 
-    friend = session.get(Profile, friend_id)
-    return FriendOut(friend=ProfilePublic.model_validate(friend), level=row.level)
+    to = email_of(target.id, session)
+    if to:
+        background.add_task(send_email, friend_request_email(
+            to=to, sender_name=me.display_name, sender_username=me.username,
+            level=row.level, request_id=row.id,
+        ))
+    return to_read(row, session)
 
 
-# ---------- 4. friend's events ----------
-
-@router.get("/{friend_id}/events", response_model=list[EventOut])
-def get_friend_events(
-    friend_id: uuid.UUID,
-    user_id: uuid.UUID = Depends(get_current_user_id),
+@router.get("/friend-requests", response_model=list[FriendRequestRead])
+def list_requests(
+    direction: Literal["incoming", "outgoing"] = Query("incoming"),
+    me: Profile = Depends(current_profile),
     session: Session = Depends(get_session),
 ):
-    row = get_accepted_friendship(session, user_id, friend_id)
-    events = fetch_user_events(friend_id)  # MOCK until the events feature exists
-    if row.level == LEVEL_CLOSE:
-        return events
-    return hide_private_details(events)
+    col = Friendship.reciever_id if direction == "incoming" else Friendship.sender_id
+    rows = session.exec(
+        select(Friendship)
+        .where(col == me.id, Friendship.status == STATUS_PENDING)
+        .order_by(Friendship.created_at.desc())
+    ).all()
+    return [to_read(r, session) for r in rows]
+
+
+@router.post("/friend-requests/{req_id}/accept", response_model=FriendRequestRead)
+def accept_request(
+    req_id: int,
+    background: BackgroundTasks,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    return respond(load_incoming(req_id, me, session), me, "accept", session, background)
+
+
+@router.post("/friend-requests/{req_id}/decline", response_model=FriendRequestRead)
+def decline_request(
+    req_id: int,
+    background: BackgroundTasks,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    return respond(load_incoming(req_id, me, session), me, "decline", session, background)
+
+
+@router.delete("/friend-requests/{req_id}", status_code=status.HTTP_204_NO_CONTENT)
+def cancel_request(
+    req_id: int,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    row = session.get(Friendship, req_id)
+    if row is None or row.sender_id != me.id or row.status != STATUS_PENDING:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Friend request not found")
+    session.delete(row)
+    session.commit()
+
+
+@router.post("/friend-requests/lookup", response_model=FriendRequestRead)
+def lookup_by_link(
+    body: LookupBody,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    row = session.get(Friendship, parse_link_id(body.token))
+    if row is None or me.id not in (row.sender_id, row.reciever_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This link is invalid")
+    return to_read(row, session)
+
+
+@router.post("/friend-requests/respond", response_model=FriendRequestRead)
+def respond_by_link(
+    body: RespondBody,
+    background: BackgroundTasks,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    row = session.get(Friendship, parse_link_id(body.token))
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This request no longer exists")
+    if row.reciever_id != me.id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN,
+                            "This request was sent to a different account. Log in with that account to respond.")
+    if row.status != STATUS_PENDING:
+        raise HTTPException(status.HTTP_409_CONFLICT, "You're already friends")
+    return respond(row, me, body.action, session, background)
+
+
+@router.get("/friends", response_model=list[FriendRead])
+def list_friends(
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    rows = session.exec(
+        select(Friendship).where(
+            Friendship.status == STATUS_ACCEPTED,
+            or_(Friendship.sender_id == me.id, Friendship.reciever_id == me.id),
+        )
+    ).all()
+    out = []
+    for f in rows:
+        other = session.get(Profile, f.reciever_id if f.sender_id == me.id else f.sender_id)
+        if other is not None:
+            out.append(FriendRead(user=brief(other), level=f.level, since=f.created_at))
+    out.sort(key=lambda f: f.user.display_name.lower())
+    return out
+
+
+@router.delete("/friends/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_friend(
+    profile_id: uuid.UUID,
+    me: Profile = Depends(current_profile),
+    session: Session = Depends(get_session),
+):
+    row = row_between(me.id, profile_id, session)
+    if row is None or row.status != STATUS_ACCEPTED:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "You're not friends with that user")
+    session.delete(row)
+    session.commit()

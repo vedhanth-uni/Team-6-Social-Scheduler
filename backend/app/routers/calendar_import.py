@@ -12,7 +12,7 @@ from sqlmodel import Session, select
 
 from app.database import get_session
 from app.models.event import Event
-from app.auth_profile import current_profile
+from app.auth_profile import current_profile, get_current_cal_id
 from app.models.profile import Profile
 from app.routers.calendars import load_calendar
 from app.routers.events import create_event, resolve_times, validate_rrule
@@ -102,3 +102,16 @@ def import_ics(
         result.warnings += [ImportIssue(uid=pe.uid, title=pe.title, reason=w) for w in built.warnings]
 
     return result
+
+
+@router.post("/events/import", response_model=ImportResult)
+def import_my_ics(
+    file: UploadFile = File(description=".ics calendar file"),
+    default_tz: str | None = Query(default=None, description="timezone for times with no timezone in the file"),
+    visibility: Visibility = Query(default="private", description="visibility given to every imported event"),
+    skip_duplicates: bool = Query(default=True),
+    user: Profile = Depends(current_profile),
+    cal_id: int = Depends(get_current_cal_id),
+    session: Session = Depends(get_session),
+):
+    return import_ics(cal_id, file, default_tz, visibility, skip_duplicates, user, session)

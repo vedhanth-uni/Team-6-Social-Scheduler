@@ -12,7 +12,6 @@ from app.models.calendar import Calendar, CalendarShare
 from app.models.profile import Profile
 from app.models.timeutil import utcnow
 from app.schemas.calendar import (
-    CalendarCreate,
     CalendarRead,
     CalendarUpdate,
     ShareCreate,
@@ -54,20 +53,22 @@ def share_to_read(share: CalendarShare, profile: Profile) -> ShareRead:
     )
 
 
-@router.post("", response_model=CalendarRead, status_code=status.HTTP_201_CREATED)
-def create_calendar(
-    body: CalendarCreate,
-    user: Profile = Depends(current_profile),
-    session: Session = Depends(get_session),
-):
-    has_any = session.exec(
-        select(Calendar.id).where(Calendar.owner_id == user.id, Calendar.deleted_at == None)  # noqa: E711
-    ).first()
-    cal = Calendar(**body.model_dump(), owner_id=user.id, is_primary=has_any is None)
-    session.add(cal)
-    session.commit()
-    session.refresh(cal)
-    return to_read(cal, "owner")
+# @router.post("", response_model=CalendarRead, status_code=status.HTTP_201_CREATED)
+# def create_calendar(
+#     body: CalendarCreate,
+#     user: Profile = Depends(current_profile),
+#     session: Session = Depends(get_session),
+# ):
+#     has_any = session.exec(
+#         select(Calendar.id).where(Calendar.owner_id == user.id, Calendar.deleted_at == None)  # noqa: E711
+#     ).first()
+#     cal = Calendar(**body.model_dump(), owner_id=user.id, is_primary=has_any is None)
+#     session.add(cal)
+#     session.commit()
+#     session.refresh(cal)
+#     return to_read(cal, "owner")
+
+#we dont need that anymore cos every user automatically comes with a calendar
 
 
 @router.get("", response_model=list[CalendarRead])
@@ -113,16 +114,18 @@ def update_calendar(
     return to_read(cal, access)
 
 
-@router.delete("/{cal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_calendar(
-    cal_id: int,
-    user: Profile = Depends(current_profile),
-    session: Session = Depends(get_session),
-):
-    cal, _ = load_calendar(cal_id, user, session, need="owner")
-    cal.deleted_at = utcnow()
-    session.add(cal)
-    session.commit()
+# @router.delete("/{cal_id}", status_code=status.HTTP_204_NO_CONTENT)
+# def delete_calendar(
+#     cal_id: int,
+#     user: Profile = Depends(current_profile),
+#     session: Session = Depends(get_session),
+# ):
+#     cal, _ = load_calendar(cal_id, user, session, need="owner")
+#     cal.deleted_at = utcnow()
+#     session.add(cal)
+#     session.commit()
+
+#this is also taken care of 
 
 
 @router.post("/{cal_id}/shares", response_model=ShareRead, status_code=status.HTTP_201_CREATED)

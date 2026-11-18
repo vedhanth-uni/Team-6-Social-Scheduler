@@ -8,7 +8,7 @@ from app.database import get_session
 from app.models.calendar import Calendar, CalendarShare
 from app.models.event import Attendee, Event
 from app.models.timeutil import utcnow
-from app.auth_profile import current_profile
+from app.auth_profile import current_profile, get_current_cal_id
 from app.models.profile import Profile
 from app.schemas.event import EventCreate, EventRead, EventUpdate, Occurrence
 from app.services import recurrence
@@ -169,6 +169,27 @@ def list_events(
             ))
     out.sort(key=lambda o: o.start)
     return out
+
+
+@router.post("/events", response_model=EventRead, status_code=status.HTTP_201_CREATED)
+def create_my_event(
+    body: EventCreate,
+    user: Profile = Depends(current_profile),
+    cal_id: int = Depends(get_current_cal_id),
+    session: Session = Depends(get_session),
+):
+    return create_event(cal_id, body, user, session)
+
+
+@router.get("/events", response_model=list[Occurrence])
+def list_my_events(
+    start: datetime = Query(description="window start, iso (no offset = utc)"),
+    end: datetime = Query(description="window end, iso (no offset = utc)"),
+    user: Profile = Depends(current_profile),
+    cal_id: int = Depends(get_current_cal_id),
+    session: Session = Depends(get_session),
+):
+    return list_events(cal_id, start, end, user, session)
 
 
 @router.get("/events/{event_id}", response_model=EventRead)

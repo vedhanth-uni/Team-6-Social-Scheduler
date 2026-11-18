@@ -8,13 +8,6 @@ Permission = Literal["viewer", "editor"]
 Relationship = Literal["close_friend", "friend", "temp"]
 
 
-class CalendarCreate(SQLModel):
-    name: str
-    description: str | None = None
-    color: str | None = None
-    timezone: str = "America/New_York"
-
-
 class CalendarUpdate(SQLModel):
     name: str | None = None
     description: str | None = None

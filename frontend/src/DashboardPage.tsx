@@ -94,7 +94,7 @@ function DashboardPage() {
                 </aside>
 
                 <div className='calendar-container'> 
-                    <CalendarEvents selectedFriends={selectedFriends}/>
+                    <CalendarEvents selectedFriends={selectedFriends} privacyToggleSetting={selectedPrivacy}/>
                 </div>
             </div>
         </div>
@@ -108,10 +108,13 @@ function DashboardPage() {
 //when do we check again for data... probably when an event has been added or deleted so Ill have to make sure it doesn't do it too often
 
 //TODO: add function that translates the time to an attribute on the style component
-//TODO: make sure that event is on line exactly because YAY! confirmed line is exactly on grid lines
-//TODO: change to not military time lol
 
-function CalendarEvents({selectedFriends}: {selectedFriends: number[]}) {
+type EventProps = {
+    selectedFriends: number[],
+    privacyToggleSetting: string[];
+}
+
+function CalendarEvents({selectedFriends, privacyToggleSetting}: EventProps) {
     const weekdays = [
         "Sun",
         "Mon",
@@ -129,10 +132,10 @@ function CalendarEvents({selectedFriends}: {selectedFriends: number[]}) {
         return date;
     });
 
-    //practice data
+    //fake event data
     const events = [
         {id: 1, weekday: 2, timeStartPixels: 30, timeLengthPixels: 90, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
-        {id: 2, weekday: 1, timeStartPixels: 1140, timeLengthPixels: 180, title: "Partyyy", privacyTag: "Shared", location: "At My House"}, 
+        {id: 2, weekday: 1, timeStartPixels: 1140, timeLengthPixels: 180, title: "Partyyy", privacyTag: "Close", location: "At My House"}, 
         {id: 3, weekday: 4, timeStartPixels: 885, timeLengthPixels: 50, title: "Class", privacyTag: "Professional", location: "White House"}, 
     ]
 
@@ -199,41 +202,44 @@ function CalendarEvents({selectedFriends}: {selectedFriends: number[]}) {
                 {labels}
 
                 {events.map((event) => (
-                    <div
-                    key={event.id}
-                    className='calendar-event'
-                    style={{
-                        gridColumnStart: `${event.weekday}`,
-                        gridColumnEnd: `${event.weekday + 1}`,
-                        top: `${event.timeStartPixels}px`,
-                        height: `${event.timeLengthPixels}px`
-                    }}
-                    >
-                        <h1> {event.title} </h1>
-                        <p> {event.location} </p>
-                    </div>    
+                    privacyToggleSetting.includes(event.privacyTag) ? (
+                        <div
+                        key={event.id}
+                        className='calendar-event'
+                        style={{
+                            gridColumnStart: `${event.weekday}`,
+                            gridColumnEnd: `${event.weekday + 1}`,
+                            top: `${event.timeStartPixels}px`, //1 px = 1 min
+                            height: `${event.timeLengthPixels}px`
+                        }}
+                        >
+                            <h1> {event.title} </h1>
+                            <p> {event.location} </p>
+                        </div>
+                    ) : (undefined) //do nothing here, because privacytag of this event is not selected
                 ))}
-                {friendsEvents.filter((event)=>selectedFriends.includes(event.friendId)).map((event)=>{
-                const friend = friends.find((f) => f.id === event.friendId);
 
-                return (
-                    <div
-                    key={event.id}
-                    className='calendar-event friend-event'
-                    style={{
-                        gridColumnStart: `${event.weekday}`,
-                        gridColumnEnd: `${event.weekday + 1}`,
-                        top: `${event.timeStartPixels}px`,
-                        height: `${event.timeLengthPixels}px`,
-                        backgroundColor: friend ? `${friend.color}A6`: "#EEEEEE", //A6 turns the background color into 65% opacity 
-                        borderColor: friend ? `${friend.borderColor}A6`: "#CCCCCC"
-                    }}
-                >
-                    <h1>{event.title}</h1>
-                    <p>{event.location}</p>
-        </div>
-    );
-})}
+                {friendsEvents.filter((event)=>selectedFriends.includes(event.friendId)).map((event)=>{
+                    const friend = friends.find((f) => f.id === event.friendId);
+
+                    return (
+                        <div
+                        key={event.id}
+                        className='calendar-event friend-event'
+                        style={{
+                            gridColumnStart: `${event.weekday}`,
+                            gridColumnEnd: `${event.weekday + 1}`,
+                            top: `${event.timeStartPixels}px`,
+                            height: `${event.timeLengthPixels}px`,
+                            backgroundColor: friend ? `${friend.color}A6`: "#EEEEEE", //A6 turns the background color into 65% opacity 
+                            borderColor: friend ? `${friend.borderColor}A6`: "#CCCCCC"
+                        }}
+                        >
+                            <h1>{event.title}</h1>
+                            <p>{event.location}</p>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     )

@@ -10,7 +10,7 @@ class Calendar(SQLModel, table=True):
     __tablename__ = "calendars"
 
     id: int | None = Field(default=None, primary_key=True)
-    owner_id: uuid.UUID = Field(foreign_key="profiles.id", index=True)
+    owner_id: uuid.UUID = Field(foreign_key="profiles.id", index=True, unique=True)
     name: str
     description: str | None = None
     color: str | None = None

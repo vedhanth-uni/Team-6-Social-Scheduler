@@ -3,3 +3,6 @@
 
 from app.models.profile import Profile
 from app.models.friendships import Friendship
+from app.models.profile_email import ProfileEmail
+from app.models.calendar import Calendar, CalendarShare
+from app.models.event import Event, Attendee

@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
+#IF SOMEONE IS SEEING THIS 😳
+
 from pydantic import BaseModel, field_validator
 
 FriendLevel = Literal["close", "professional"]

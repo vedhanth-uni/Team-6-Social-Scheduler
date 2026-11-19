@@ -15,7 +15,7 @@ function DashboardPage() {
         month: 'long',
         year: 'numeric'
     });
-    const calendarId = 1; //temporary calendar Id (replace with actual Id later)
+    //const calendarId = 1; //temporary calendar Id (replace with actual Id later)
     const [currentView, setCurrentView] = useState('Weekly');
     const [selectedPrivacy, setSelectedPrivacy] = useState<string[]>([]);
 
@@ -25,9 +25,8 @@ function DashboardPage() {
 
     async function handleSaveEvent(event: CalendarEvent){
         try{
-            await createCalendarEvent(calendarId, event);
+            await createCalendarEvent(event);
             setShowEventForm(false);
-
         } catch(error){
             console.error('Error creating the event:', error);
         }
@@ -78,7 +77,7 @@ function DashboardPage() {
                         {/* Display the form only when the popup is open */}
                         {showEventForm && (
                             <AddEventForm
-                                onSave={handleSaveEvent}
+                                onSave= {handleSaveEvent}
                                 onCancel={() => setShowEventForm(false)}
                             />
                         )}

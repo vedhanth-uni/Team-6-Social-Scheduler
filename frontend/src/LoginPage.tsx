@@ -9,7 +9,7 @@ type AuthMode = "login" | "signup";
 function LoginForm() {
   const [isSelected, setIsSelected] = useState<Boolean>(false);
   const [mode, setMode] = useState<AuthMode>("login");
-  const [message, setMessage] = useState<String>("Welcomeee!");
+  const [message, setMessage] = useState<String>("Welcome!");
 
   //recall that this type for event might be wrong
   async function handleSubmit(e: React.SubmitEvent) {
@@ -116,7 +116,7 @@ function LoginPage() {
     <main className="login-page">
       <div className = "logo-container">
         <img
-          src="/logo.svg"
+          src="/logo_small.svg"
           className="human-logo"
           />
           <div className = "green-logo-wrapper">

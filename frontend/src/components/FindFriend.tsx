@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { apiFetch } from '../api';
+import { apiFetch } from '../api files/api';
 
 interface Profile {
     id: string;

@@ -5,7 +5,7 @@ import PrivacyToggle from './components/PrivacyToggle';
 import AddEventForm from './AddEventForm';
 import FindFriend from './components/FindFriend';
 import ImportButton from './components/ImportButton';
-import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from './eventApi';
+import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from './api files/eventApi';
 import type { CalendarEvent } from './AddEventForm';
 import ProfilePopup from './components/ProfilePopup';
 import FriendsChecklist from './components/FriendsChecklist';

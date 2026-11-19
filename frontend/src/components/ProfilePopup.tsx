@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react';
 import {UserRound} from 'lucide-react'; 
 import './ProfilePopup.css';
-import { getMyProfile } from '../profileApi';
-import type { UserProfile } from '../profileApi';
+import { getMyProfile } from '../api files/profileApi';
+import type { UserProfile } from '../api files/profileApi';
 
 function ProfilePopup(){
     const [showProfile, setShowProfile] = useState(false);

@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { CalendarEvent } from "./AddEventForm";
+import type { CalendarEvent } from "../AddEventForm";
 
 export async function createCalendarEvent(
     event: CalendarEvent

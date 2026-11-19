@@ -5,11 +5,12 @@ import PrivacyToggle from './components/PrivacyToggle';
 import AddEventForm from './AddEventForm';
 import FindFriend from './components/FindFriend';
 import ImportButton from './components/ImportButton';
-import { createCalendarEvent } from './eventApi';
+import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from './eventApi';
 import type { CalendarEvent } from './AddEventForm';
 import ProfilePopup from './components/ProfilePopup';
 import FriendsChecklist from './components/FriendsChecklist';
 import {friends} from "./components/FriendsChecklist";
+import EditEventForm from './components/EditEventForm';
 
 function DashboardPage() {
     const currentMonth = new Date().toLocaleDateString('en-US', {
@@ -115,6 +116,18 @@ type EventProps = {
 }
 
 function CalendarEvents({selectedFriends, privacyToggleSetting}: EventProps) {
+    const [selectedEvent, setSelectedEvent] = useState<{
+        id: number;
+        title: string;
+        location: string;
+        privacyTag: string; 
+        date:string;
+        allDay: boolean;
+        startTime:string;
+        endTime:string;
+        description:string;
+    } | null>(null);
+    
     const weekdays = [
         "Sun",
         "Mon",
@@ -133,11 +146,49 @@ function CalendarEvents({selectedFriends, privacyToggleSetting}: EventProps) {
     });
 
     //fake event data
-    const events = [
-        {id: 1, weekday: 2, timeStartPixels: 30, timeLengthPixels: 90, title: "Gym Sesh", privacyTag: "Private", location: "Lederle"}, 
-        {id: 2, weekday: 1, timeStartPixels: 1140, timeLengthPixels: 180, title: "Partyyy", privacyTag: "Close", location: "At My House"}, 
-        {id: 3, weekday: 4, timeStartPixels: 885, timeLengthPixels: 50, title: "Class", privacyTag: "Professional", location: "White House"}, 
-    ]
+    const [events, setEvents] = useState([
+        {id: 1, weekday: 2, timeStartPixels: 30, timeLengthPixels: 90, title: "Gym Sesh", privacyTag: "Private", location: "Lederle", date: "2026-11-18", allDay: true, startTime:"", endTime:"", description:"Gym Sesh at Lederle!"},  //I'm just adding the missing properties of date, startTime, endTime, allDay, and description so that typescript doesnt complain
+        {id: 2, weekday: 1, timeStartPixels: 1140, timeLengthPixels: 180, title: "Partyyy", privacyTag: "Close", location: "At My House", date: "2026-11-18", allDay: true, startTime:"", endTime:"", description:"Party at my house!"}, //also allDay is true just so that startTime and endTime can be empty strings for now
+        {id: 3, weekday: 4, timeStartPixels: 885, timeLengthPixels: 50, title: "Class", privacyTag: "Professional", location: "White House", date: "2026-11-18", allDay: true, startTime:"", endTime:"", description:"Class time :)"}, 
+    ]);
+
+    async function handleDeleteEvent(eventId:number){
+        try{
+            await deleteCalendarEvent(eventId);
+            setEvents(events.filter((event)=>event.id !== eventId));
+            setSelectedEvent(null);
+        }
+        catch(error){
+            console.error("Error deleting event ", error);
+        }
+    }
+
+    async function handleUpdateEvent(updatedEvent: CalendarEvent){
+        if(!selectedEvent) return;
+        try{
+            await updateCalendarEvent(selectedEvent.id, updatedEvent); 
+            setEvents((prevEvents) => 
+                prevEvents.map((event) => //goes thru each event stored in the array
+                    event.id === selectedEvent.id //checks if this is the event that the user edited
+                        ? {
+                            ...event, //if so, keep the fields that weren't changed, and update the old values with new values
+                            title: updatedEvent.title,
+                            location: updatedEvent.location,
+                            description: updatedEvent.description,
+                            privacyTag: updatedEvent.visibility,
+                            allDay: updatedEvent.allDay,
+                            //I have to add updatedEvent.startTime and updatedEvent.endTime once the conversion function from pixels to hours is done
+                        }
+                        : event //if the id doesn't match, then don't change the event details 
+            )
+        );
+
+            setSelectedEvent(null);
+
+    } catch (error) {
+        console.error("Error updating event:", error);
+    }
+}
 
     //fake friends events data
     const friendsEvents= [
@@ -206,6 +257,7 @@ function CalendarEvents({selectedFriends, privacyToggleSetting}: EventProps) {
                         <div
                         key={event.id}
                         className='calendar-event'
+                        onClick={()=>setSelectedEvent(event)}
                         style={{
                             gridColumnStart: `${event.weekday}`,
                             gridColumnEnd: `${event.weekday + 1}`,
@@ -240,6 +292,16 @@ function CalendarEvents({selectedFriends, privacyToggleSetting}: EventProps) {
                         </div>
                     );
                 })}
+                {selectedEvent &&(
+                    <EditEventForm 
+                        event={selectedEvent}
+                        onCancel = {()=> setSelectedEvent(null)}
+                        onDelete={handleDeleteEvent}
+                        onUpdate={handleUpdateEvent}
+                        
+                        />
+                        
+                 )}
             </div>
         </div>
     )

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
+
+
 :root {
   --color-bg-light: #FFE6D0;
   --color-bg-dark: #E8D0BC;
@@ -48,18 +50,17 @@ body {
 }
 
 .human-logo {
-  width: 310px;
+  width: 150px;
   height: auto;
   object-fit: contain;
   position: relative;
-  top: -12px;
-  left: 10px;
   z-index: 2;
   margin-right: -140px;
 }
 
 .green-logo-wrapper {
   position: relative;
+  left: 60px;
   width: 290px;
   flex-shrink: 0;
   z-index: 1;
@@ -72,6 +73,7 @@ body {
 }
 
 .logo-text {
+  /* font-family: 'Alte Haas Grotesk'; */
   position: absolute;
   font-size: 48px;
   font-weight: 1000;

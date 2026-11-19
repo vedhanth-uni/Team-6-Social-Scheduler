@@ -1,6 +1,5 @@
 import { useState, type SubmitEvent  } from 'react';
 import './AddEventForm.css';
-//double check - should add event have visibility (public/private/professional for each event)?
 
 //information to be collected for one event
 export interface CalendarEvent {
@@ -12,6 +11,7 @@ export interface CalendarEvent {
     location: string;
     description: string;
     visibility: 'public' | 'private' | 'professional';
+    rrule: string | null; //recurrence rule for repetition
 }
 
 //info the parent component passes to the form
@@ -30,6 +30,15 @@ function AddEventForm({ onSave, onCancel }: AddEventFormProps) {
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [visibility, setVisibility] = useState<CalendarEvent['visibility']>('private');
+    const [repeat, setRepeat] = useState('never');
+
+    //implemented recurrence so that events can repeat
+    function getRecurrenceRule(): string | null {
+    if (repeat === 'never') {
+        return null;
+    }
+    return `FREQ=${repeat.toUpperCase()}`;
+}
 
     //call when user submits form
     function handleSubmit(event: SubmitEvent <HTMLFormElement>) {
@@ -51,6 +60,7 @@ function AddEventForm({ onSave, onCancel }: AddEventFormProps) {
         location,
         description,
         visibility,
+        rrule: getRecurrenceRule(),
     };
 
     //now parent component can handle saved event
@@ -175,8 +185,23 @@ function AddEventForm({ onSave, onCancel }: AddEventFormProps) {
                 </select>
             </div>
 
+            <div className="form-group">
+                <label htmlFor="repeat">Repeat</label>
+                <select
+                    id="repeat"
+                    value={repeat}
+                    onChange={(event) => setRepeat(event.target.value)}
+                >
+                    <option value="never">Never</option>
+                    <option value="daily">Every day</option>
+                    <option value="weekly">Every week</option>
+                    <option value="monthly">Every month</option>
+                    <option value="yearly">Every year</option>
+                </select>
+            </div>
+
             <div className="event-form-buttons">
-                <button type="submit">Save Event</button>
+                <button type="submit"> Save Event </button>
                 <button type="button" onClick={onCancel}>
                     Cancel
                 </button>

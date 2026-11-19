@@ -1,5 +1,5 @@
 import './LoginPage.css';
-import {supabase} from './supabaseClient';
+import {supabase} from './api files/supabaseClient';
 import { useState } from "react";
 import { Link } from 'react-router';
 

@@ -1,6 +1,9 @@
 
 
+
 function PrivacyToggle({selectedPrivacy, setSelectedPrivacy}){
+    
+    console.log(selectedPrivacy);
     const privacyOptions=[
         "Private",
         "Close",

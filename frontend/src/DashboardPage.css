@@ -324,3 +324,44 @@ html, body {
     cursor: pointer; 
     box-shadow: 3px 3px 8px rgba(57, 35, 17, 0.25);
 }
+/* today highlight + current time bar (shared by weekly and monthly views) */
+:root {
+    --color-now: var(--color-accent-dark);
+}
+
+.day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+}
+
+.day-number.today {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent-dark);
+    font-weight: 700;
+}
+
+/* dark brown instead of green so the bar stays visible when it crosses a green event */
+.now-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--color-now);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.now-line::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-now);
+}

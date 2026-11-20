@@ -14,6 +14,8 @@ import FriendsChecklist from './components/FriendsChecklist';
 import EditEventForm from './components/EditEventForm';
 import { initialOwnEvents } from './mockEvents';
 import type { OwnEvent } from './mockEvents';
+import { useNow } from './hooks/useNow';
+import { buildWeekDates, isSameDay, minutesSinceMidnight } from './lib/dates';
 
 function DashboardPage() {
     const currentMonth = new Date().toLocaleDateString('en-US', {
@@ -24,7 +26,9 @@ function DashboardPage() {
     const [selectedPrivacy, setSelectedPrivacy] = useState<string[]>([]);
     const [selectedFriends, setSelectedFriends] = useState<string[]>([]); //friend ids (UUIDs) ticked in FriendsChecklist
     const [friends, setFriends] = useState<CalendarFriend[]>([]);
-    const [currDate] = useState(new Date()); //if we add prev/next week buttons, we would need setCurrDate
+    //now = the client's clock (ticks every minute), viewDate = the day the calendar is showing
+    const now = useNow();
+    const [viewDate] = useState(() => new Date()); //prev/next buttons would need setViewDate
 
     //events live here (not inside a view) so every calendar view shows the same data
     const [events, setEvents] = useState<OwnEvent[]>(initialOwnEvents);
@@ -42,7 +46,7 @@ function DashboardPage() {
         if (selectedFriends.length === 0) return; // nothing to fetch; render filter hides old events
 
         let cancelled = false; //ignore results from an outdated selection
-        const weekStart = startOfWeek(currDate);
+        const weekStart = startOfWeek(viewDate);
         Promise.allSettled(selectedFriends.map((id) => getFriendEvents(id, weekStart)))
             .then((results) => {
                 if (cancelled) return;
@@ -54,7 +58,7 @@ function DashboardPage() {
                 setFriendEvents(loaded); // runs asynchronously in .then, so the lint rule is fine with it
             });
         return () => { cancelled = true; };
-    }, [selectedFriends, currDate]);
+    }, [selectedFriends, viewDate]);
 
     //only show own events whose privacy tag is toggled on, and friend events for ticked friends
     const visibleEvents = events.filter((event) => selectedPrivacy.includes(event.privacyTag));
@@ -169,7 +173,8 @@ function DashboardPage() {
                         events={visibleEvents}
                         friendEvents={visibleFriendEvents}
                         onSelectEvent={setSelectedEvent}
-                        currDate={currDate}
+                        now={now}
+                        viewDate={viewDate}
                     />
                 </div>
             </div>
@@ -191,17 +196,16 @@ type EventProps = {
     events: OwnEvent[]; //already filtered by the privacy toggle
     friendEvents: FriendEvent[]; //already filtered by the friends checklist
     onSelectEvent: (event: OwnEvent) => void;
-    currDate: Date;
+    now: Date;
+    viewDate: Date; //any day in the week to show
 }
 
-function CalendarEvents({ friends, events, friendEvents, onSelectEvent, currDate }: EventProps) {
+function CalendarEvents({ friends, events, friendEvents, onSelectEvent, now, viewDate }: EventProps) {
     const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    const weekDate = weekdays.map((_, i) => {
-        const date = new Date(currDate);
-        date.setDate(date.getDate() - date.getDay() + i);
-        return date;
-    });
+    const weekDate = buildWeekDates(viewDate);
+    //grid column of today (1-7), or 0 when today isn't in the week being shown
+    const todayColumn = weekDate.findIndex((date) => isSameDay(date, now)) + 1;
 
     const hours = Array.from({ length: 24 }, (_, i) => i + 1);
     //row 1 starts at midnight (1px = 1 min from the top), so the first label is 12AM
@@ -236,7 +240,12 @@ function CalendarEvents({ friends, events, friendEvents, onSelectEvent, currDate
         <div className='calendar'>
             <div className="week-header">
                 {weekdays.map((day, i) => (
-                    <div className="weekday" key={day}>{day} {weekDate[i].getDate()}</div>
+                    <div className="weekday" key={day}>
+                        {day}{' '}
+                        <span className={isSameDay(weekDate[i], now) ? 'day-number today' : 'day-number'}>
+                            {weekDate[i].getDate()}
+                        </span>
+                    </div>
                 ))}
             </div>
             <div className='canvas'>
@@ -280,6 +289,18 @@ function CalendarEvents({ friends, events, friendEvents, onSelectEvent, currDate
                         </div>
                     );
                 })}
+
+                {todayColumn > 0 && (
+                    <div
+                        className='now-line'
+                        aria-hidden='true'
+                        style={{
+                            gridColumn: `${todayColumn} / ${todayColumn + 1}`,
+                            gridRow: '1 / -1', //measure top from row 1 instead of the canvas padding edge
+                            top: `${minutesSinceMidnight(now)}px`, //1 px = 1 min, same as events
+                        }}
+                    />
+                )}
             </div>
         </div>
     )

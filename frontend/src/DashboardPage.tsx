@@ -259,6 +259,7 @@ function CalendarEvents({ friends, events, friendEvents, onSelectEvent, now, vie
                         style={{
                             gridColumnStart: `${event.weekday}`,
                             gridColumnEnd: `${event.weekday + 1}`,
+                            gridRow: '1 / -1', //without this, top is measured from the canvas padding edge (16px above row 1)
                             top: `${event.timeStartPixels}px`, //1 px = 1 min
                             height: `${event.timeLengthPixels}px`
                         }}
@@ -278,6 +279,7 @@ function CalendarEvents({ friends, events, friendEvents, onSelectEvent, now, vie
                             style={{
                                 gridColumnStart: `${event.weekday}`,
                                 gridColumnEnd: `${event.weekday + 1}`,
+                                gridRow: '1 / -1',
                                 top: `${event.timeStartPixels}px`,
                                 height: `${event.timeLengthPixels}px`,
                                 backgroundColor: friend ? `${friend.color}A6` : "#EEEEEE", //A6 = 65% opacity

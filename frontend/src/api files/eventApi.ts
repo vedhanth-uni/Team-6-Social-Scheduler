@@ -1,9 +1,7 @@
 import { apiFetch } from "./api";
 import type { CalendarEvent } from "../AddEventForm";
 
-export async function createCalendarEvent(
-    event: CalendarEvent
-) {
+export async function createCalendarEvent(event: CalendarEvent) {
     const body = {
         title: event.title,
         description: event.description || null,
@@ -16,22 +14,18 @@ export async function createCalendarEvent(
         rrule: event.rrule,
     };
 
-    return apiFetch('/events',{
+    return apiFetch('/events', {
         method: 'POST',
         body: JSON.stringify(body),
     });
 }
 
-export async function deleteCalendarEvent(eventId:number){
-    const res = await apiFetch(`/events/${eventId}`, {
-        method: "DELETE"
-    });
-    if(!res.ok){
-        throw new Error("Failed to delete event");
-    }
+// apiFetch already throws on any non-2xx response, so no res.ok checks here
+export async function deleteCalendarEvent(eventId: number) {
+    await apiFetch(`/events/${eventId}`, { method: "DELETE" });
 }
 
-export async function updateCalendarEvent(eventId: number, event:CalendarEvent){
+export async function updateCalendarEvent(eventId: number, event: CalendarEvent) {
     const body = {
         title: event.title,
         description: event.description || null,
@@ -41,14 +35,9 @@ export async function updateCalendarEvent(eventId: number, event:CalendarEvent){
         end: event.allDay ? null : `${event.date}T${event.endTime}:00`,
         timezone: null,
         visibility: event.visibility,
-
     };
-    const res = await apiFetch(`/events/${eventId}`, {
+    return apiFetch(`/events/${eventId}`, {
         method: "PATCH",
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
     });
-    if(!res.ok){
-        throw new Error("Failed to update event");
-    }
-    return res.json(); 
 }

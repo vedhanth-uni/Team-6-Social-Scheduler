@@ -201,8 +201,9 @@ function CalendarEvents({ friends, selectedFriends, privacyToggleSetting }: Even
     }
 
     const hours = Array.from({ length: 24 }, (_, i) => i + 1);
-    const hourLabels = ["1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM", "12PM",
-        "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM", "12AM"];
+    //row 1 starts at midnight (1px = 1 min from the top), so the first label is 12AM
+    const hourLabels = ["12AM", "1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM",
+        "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM"];
 
     //layer that allows row line styling and hours written on calendar
     const labels = [];

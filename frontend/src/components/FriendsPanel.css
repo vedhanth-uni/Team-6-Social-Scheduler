@@ -1,0 +1,331 @@
+/* friends panel: toolbar trigger + left-side drawer.
+   reuses the app colors from DashboardPage.css (--color-*) and adds the few it needs below. */
+
+.friends-panel,
+.friends-panel-trigger {
+    --fp-space-1: 4px;
+    --fp-space-2: 8px;
+    --fp-space-3: 12px;
+    --fp-space-4: 16px;
+    --fp-space-5: 24px;
+    --fp-text: var(--color-accent-dark, #392311);
+    --fp-text-muted: #6E5A4A;
+    --fp-surface: var(--color-bg-light, #FFE6D0);
+    --fp-surface-raised: #FFF4EA;
+    --fp-border: var(--color-bg-dark, #E8D0BC);
+    --fp-primary: var(--color-accent-light, #6CC448);
+    --fp-primary-hover: #5DB33B;
+    --fp-danger: #B3261E;
+    --fp-danger-hover: #8C1D17;
+    --fp-text-on-danger: #FFFFFF;
+    --fp-close-bg: #D9F2CE;
+    --fp-professional-bg: #D6E6FA;
+    --fp-shadow: 0 8px 28px rgba(57, 35, 17, 0.28);
+    --fp-radius-sm: 4px;
+    --fp-radius-md: 8px;
+    --fp-radius-lg: 16px;
+    --fp-motion: 250ms;
+}
+
+/* ---------- trigger ---------- */
+
+.friends-panel-trigger {
+    position: relative;
+    flex-shrink: 0;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.friends-panel-trigger:focus-visible {
+    outline: 3px solid var(--fp-text);
+    outline-offset: 2px;
+}
+
+.friends-panel-trigger__badge {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background-color: var(--fp-danger);
+    color: var(--fp-text-on-danger);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 22px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- drawer ---------- */
+
+.friends-panel-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background-color: rgba(57, 35, 17, 0.12);
+}
+
+.friends-panel {
+    position: fixed;
+    top: var(--fp-space-4);
+    bottom: var(--fp-space-4);
+    left: var(--fp-space-4);
+    z-index: 301;
+    width: clamp(320px, 25vw, 420px);
+    max-width: calc(100vw - 2 * var(--fp-space-4));
+    display: flex;
+    flex-direction: column;
+    gap: var(--fp-space-4);
+    padding: var(--fp-space-5);
+    background-color: var(--fp-surface);
+    color: var(--fp-text);
+    border-radius: var(--fp-radius-lg);
+    box-shadow: var(--fp-shadow);
+    overflow: hidden;
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    animation: friends-panel-in var(--fp-motion) ease-out;
+}
+
+@keyframes friends-panel-in {
+    from { transform: translateX(-24px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .friends-panel { animation: none; }
+}
+
+.friends-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.friends-panel__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.friends-panel__notice {
+    margin: 0;
+    font-size: 14px;
+    color: var(--fp-text-muted);
+}
+
+.friends-panel__notice:empty {
+    display: none;
+}
+
+.friends-panel__error {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--fp-space-2);
+    font-size: 14px;
+}
+
+.friends-panel__error p {
+    margin: 0;
+    color: var(--fp-danger);
+}
+
+/* ---------- sections ---------- */
+
+.friends-panel__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fp-space-2);
+    min-height: 0;
+}
+
+/* the friends list takes whatever height the requests leave */
+.friends-panel__section--grow {
+    flex: 1;
+    padding-top: var(--fp-space-4);
+    border-top: 1px solid var(--fp-border);
+}
+
+.friends-panel__heading {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.friends-panel__hint {
+    margin: 0;
+    font-size: 14px;
+    color: var(--fp-text-muted);
+}
+
+.friends-panel__search {
+    height: 40px;
+    padding: 0 var(--fp-space-3);
+    border: 1px solid var(--fp-border);
+    border-radius: var(--fp-radius-md);
+    background-color: var(--fp-surface-raised);
+    color: var(--fp-text);
+    font: inherit;
+    font-size: 14px;
+}
+
+.friends-panel__search:focus-visible {
+    outline: 2px solid var(--fp-text);
+    outline-offset: 1px;
+}
+
+.friends-panel__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--fp-space-2);
+}
+
+.friends-panel__list--expanded {
+    max-height: 40vh;
+    overflow-y: auto;
+    padding-right: var(--fp-space-1);
+}
+
+.friends-panel__list--fill {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: var(--fp-space-1);
+}
+
+.friends-panel__toggle {
+    align-self: flex-start;
+}
+
+/* ---------- rows ---------- */
+
+.friend-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "identity chip"
+        "actions actions";
+    align-items: center;
+    gap: var(--fp-space-2);
+    padding: var(--fp-space-3);
+    background-color: var(--fp-surface-raised);
+    border-radius: var(--fp-radius-md);
+}
+
+/* friend rows fit on one line until "Remove" is clicked and the confirm buttons need room */
+.friend-row--compact {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "identity chip actions";
+    padding: var(--fp-space-2) var(--fp-space-3);
+}
+
+.friend-row__identity {
+    grid-area: identity;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.friend-row__name {
+    font-size: 16px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.friend-row__meta {
+    font-size: 13px;
+    color: var(--fp-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.friend-row .level-chip {
+    grid-area: chip;
+}
+
+.friend-row__actions {
+    grid-area: actions;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--fp-space-2);
+}
+
+.level-chip {
+    padding: 2px var(--fp-space-2);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fp-text);
+}
+
+.level-chip--close { background-color: var(--fp-close-bg); }
+.level-chip--professional { background-color: var(--fp-professional-bg); }
+
+/* ---------- buttons ---------- */
+
+.panel-button {
+    height: 32px;
+    padding: 0 var(--fp-space-3);
+    border: 1px solid transparent;
+    border-radius: var(--fp-radius-sm);
+    background: none;
+    color: var(--fp-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+
+.panel-button:focus-visible {
+    outline: 2px solid var(--fp-text);
+    outline-offset: 2px;
+}
+
+.panel-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.panel-button--primary { background-color: var(--fp-primary); }
+.panel-button--primary:hover:not(:disabled) { background-color: var(--fp-primary-hover); }
+
+.panel-button--secondary { border-color: var(--fp-text); }
+.panel-button--secondary:hover:not(:disabled) { background-color: var(--fp-border); }
+
+.panel-button--danger { background-color: var(--fp-danger); color: var(--fp-text-on-danger); }
+.panel-button--danger:hover:not(:disabled) { background-color: var(--fp-danger-hover); }
+
+.panel-button--text { padding: 0 var(--fp-space-1); }
+.panel-button--text:hover:not(:disabled) { text-decoration: underline; }
+
+.panel-button--icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+}
+
+.panel-button--icon:hover { background-color: var(--fp-border); }
+
+.panel-button:active:not(:disabled) { transform: translateY(1px); }
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}

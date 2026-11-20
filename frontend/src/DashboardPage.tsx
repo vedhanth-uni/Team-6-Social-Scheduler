@@ -4,6 +4,7 @@ import ViewDropdown from './components/ViewDropdown';
 import PrivacyToggle from './components/PrivacyToggle';
 import AddEventForm from './AddEventForm';
 import FindFriend from './components/FindFriend';
+import FriendsPanel from './components/FriendsPanel';
 import ImportButton from './components/ImportButton';
 import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from './api files/eventApi';
 import type { CalendarEvent } from './AddEventForm';
@@ -56,6 +57,7 @@ function DashboardPage() {
                     />
                 </div>
                 <FindFriend/>
+                <FriendsPanel/>
                 <ImportButton/>
                 <ProfilePopup/>
             </header>

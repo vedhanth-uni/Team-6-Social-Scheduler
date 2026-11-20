@@ -1,6 +1,13 @@
 import {useState} from 'react';
 
-function ViewDropdown({currentView, setCurrentView}){
+export type CalendarView = 'Weekly' | 'Monthly';
+
+interface ViewDropdownProps {
+    currentView: CalendarView;
+    setCurrentView: (view: CalendarView) => void;
+}
+
+function ViewDropdown({currentView, setCurrentView}: ViewDropdownProps){
     const [isViewOpen, setIsViewOpen] = useState(false);
     return(
         <div className = "view-container">

@@ -1,12 +1,14 @@
 import './DashboardPage.css';
 import { useEffect, useState } from 'react';
 import ViewDropdown from './components/ViewDropdown';
+import type { CalendarView } from './components/ViewDropdown';
+import MonthView from './components/MonthView';
 import PrivacyToggle from './components/PrivacyToggle';
 import AddEventForm from './AddEventForm';
 import FindFriend from './components/FindFriend';
 import ImportButton from './components/ImportButton';
 import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from './api files/eventApi';
-import { getCalendarFriends, getFriendEvents, startOfWeek } from './api files/friendsApi';
+import { getCalendarFriends, getFriendEvents } from './api files/friendsApi';
 import type { CalendarFriend, FriendEvent } from './api files/friendsApi';
 import type { CalendarEvent } from './AddEventForm';
 import ProfilePopup from './components/ProfilePopup';
@@ -15,20 +17,27 @@ import EditEventForm from './components/EditEventForm';
 import { initialOwnEvents } from './mockEvents';
 import type { OwnEvent } from './mockEvents';
 import { useNow } from './hooks/useNow';
-import { buildWeekDates, isSameDay, minutesSinceMidnight } from './lib/dates';
+import { addDays, buildMonthGrid, buildWeekDates, formatDateKey, isSameDay, minutesSinceMidnight, startOfWeek } from './lib/dates';
 
 function DashboardPage() {
-    const currentMonth = new Date().toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-    });
-    const [currentView, setCurrentView] = useState('Weekly');
+    const [currentView, setCurrentView] = useState<CalendarView>('Weekly');
     const [selectedPrivacy, setSelectedPrivacy] = useState<string[]>([]);
     const [selectedFriends, setSelectedFriends] = useState<string[]>([]); //friend ids (UUIDs) ticked in FriendsChecklist
     const [friends, setFriends] = useState<CalendarFriend[]>([]);
     //now = the client's clock (ticks every minute), viewDate = the day the calendar is showing
     const now = useNow();
     const [viewDate] = useState(() => new Date()); //prev/next buttons would need setViewDate
+    const currentMonth = viewDate.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+    });
+
+    //days the current view covers: [rangeStart, rangeEnd), used to fetch and filter friend events
+    const monthGrid = buildMonthGrid(viewDate);
+    const rangeStart = currentView === 'Weekly' ? startOfWeek(viewDate) : monthGrid[0];
+    const rangeEnd = currentView === 'Weekly' ? addDays(rangeStart, 7) : addDays(monthGrid[monthGrid.length - 1], 1);
+    const rangeStartMs = rangeStart.getTime(); //numbers, so the fetch effect only reruns when the range changes
+    const rangeEndMs = rangeEnd.getTime();
 
     //events live here (not inside a view) so every calendar view shows the same data
     const [events, setEvents] = useState<OwnEvent[]>(initialOwnEvents);
@@ -46,8 +55,9 @@ function DashboardPage() {
         if (selectedFriends.length === 0) return; // nothing to fetch; render filter hides old events
 
         let cancelled = false; //ignore results from an outdated selection
-        const weekStart = startOfWeek(viewDate);
-        Promise.allSettled(selectedFriends.map((id) => getFriendEvents(id, weekStart)))
+        const start = new Date(rangeStartMs);
+        const end = new Date(rangeEndMs);
+        Promise.allSettled(selectedFriends.map((id) => getFriendEvents(id, start, end)))
             .then((results) => {
                 if (cancelled) return;
                 const loaded: FriendEvent[] = [];
@@ -58,11 +68,16 @@ function DashboardPage() {
                 setFriendEvents(loaded); // runs asynchronously in .then, so the lint rule is fine with it
             });
         return () => { cancelled = true; };
-    }, [selectedFriends, viewDate]);
+    }, [selectedFriends, rangeStartMs, rangeEndMs]);
 
     //only show own events whose privacy tag is toggled on, and friend events for ticked friends
     const visibleEvents = events.filter((event) => selectedPrivacy.includes(event.privacyTag));
-    const visibleFriendEvents = friendEvents.filter((event) => selectedFriends.includes(event.friendId));
+    //the date check also hides month results for a moment after switching back to weekly, until the week refetch lands
+    const rangeStartKey = formatDateKey(rangeStart);
+    const rangeEndKey = formatDateKey(rangeEnd);
+    const visibleFriendEvents = friendEvents.filter((event) =>
+        selectedFriends.includes(event.friendId) && event.date >= rangeStartKey && event.date < rangeEndKey
+    );
 
     const handleFriendSelection = (friendIds: string[]) => {
         setSelectedFriends(friendIds);
@@ -168,14 +183,25 @@ function DashboardPage() {
                 </aside>
 
                 <div className='calendar-container'>
-                    <CalendarEvents
-                        friends={friends}
-                        events={visibleEvents}
-                        friendEvents={visibleFriendEvents}
-                        onSelectEvent={setSelectedEvent}
-                        now={now}
-                        viewDate={viewDate}
-                    />
+                    {currentView === 'Weekly' ? (
+                        <CalendarEvents
+                            friends={friends}
+                            events={visibleEvents}
+                            friendEvents={visibleFriendEvents}
+                            onSelectEvent={setSelectedEvent}
+                            now={now}
+                            viewDate={viewDate}
+                        />
+                    ) : (
+                        <MonthView
+                            friends={friends}
+                            events={visibleEvents}
+                            friendEvents={visibleFriendEvents}
+                            onSelectEvent={setSelectedEvent}
+                            now={now}
+                            viewDate={viewDate}
+                        />
+                    )}
                 </div>
             </div>
 

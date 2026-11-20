@@ -1,0 +1,75 @@
+/* monthly view: reuses .calendar, .week-header, .weekday, .calendar-event and .day-number from DashboardPage.css */
+
+.month-view {
+    display: flex;
+    flex-direction: column;
+}
+
+.month-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: minmax(110px, 1fr);
+    padding: 0 1rem 1rem;
+}
+
+.month-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 4px;
+    overflow: hidden;
+    border-right: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+.month-cell:nth-child(7n) {
+    border-right: none;
+}
+
+.month-cell .day-number {
+    align-self: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+/* fade the contents, not the cell, so grid lines stay the same strength */
+.outside-month > * {
+    opacity: 0.45;
+}
+
+/* chips: keep the event colors but drop the weekly view's absolute positioning */
+.calendar-event.month-event {
+    position: static;
+    width: auto;
+    height: auto;
+    border-width: 1px;
+    border-radius: 0.35rem;
+    padding: 1px 4px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--color-accent-dark);
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+button.calendar-event.month-event {
+    cursor: pointer;
+}
+
+.month-event-time {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.month-more {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent-dark);
+    padding-left: 4px;
+}

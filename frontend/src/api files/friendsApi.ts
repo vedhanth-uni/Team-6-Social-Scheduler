@@ -1,4 +1,5 @@
 import { apiFetch } from './api';
+import { formatDateKey } from '../lib/dates';
 
 // ---- shapes match backend/app/schemas/friend.py ----
 
@@ -85,6 +86,7 @@ export interface CalendarFriend {
 export interface FriendEvent {
     id: number;
     friendId: string;
+    date: string;             // local "YYYY-MM-DD" of the start, used by the monthly view
     weekday: number;          // 1 = Sun ... 7 = Sat
     timeStartPixels: number;  // 1 px = 1 minute from midnight
     timeLengthPixels: number;
@@ -118,13 +120,11 @@ export function startOfWeek(date: Date): Date {
     return d;
 }
 
-export async function getFriendEvents(friendId: string, weekStart: Date): Promise<FriendEvent[]> {
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
+// rangeStart/rangeEnd: the week (weekly view) or the whole month grid (monthly view)
+export async function getFriendEvents(friendId: string, rangeStart: Date, rangeEnd: Date): Promise<FriendEvent[]> {
     const qs = new URLSearchParams({
-        start: weekStart.toISOString(),
-        end: weekEnd.toISOString(),
+        start: rangeStart.toISOString(),
+        end: rangeEnd.toISOString(),
     });
     const occurrences: FriendOccurrence[] = await apiFetch(`/friends/${friendId}/events?${qs}`);
 
@@ -134,10 +134,11 @@ export async function getFriendEvents(friendId: string, weekStart: Date): Promis
             const e = new Date(o.end);
             return { o, s, e };
         })
-        .filter(({ s }) => s >= weekStart) // skip events that began in a previous week
+        .filter(({ s }) => s >= rangeStart) // skip events that began before the range
         .map(({ o, s, e }): FriendEvent => ({
             id: o.event_id,
             friendId,
+            date: formatDateKey(s),
             weekday: s.getDay() + 1,
             timeStartPixels: o.all_day ? 0 : s.getHours() * 60 + s.getMinutes(),
             timeLengthPixels: o.all_day ? 30 : Math.max(15, (e.getTime() - s.getTime()) / 60000),

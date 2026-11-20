@@ -17,7 +17,8 @@ class Friendship(SQLModel , table = True):
     __tablename__= "friendships"
     __table_args__ = (
         UniqueConstraint("sender_id" , "reciever_id" , name = "uq_friendship_pair"),
-        CheckConstraint("sender_id" != "reciever_id" , name = "ck_friendship_not_self"),
+        # has to be one SQL string. `"a" != "b"` is compared by python first and becomes CHECK (true)
+        CheckConstraint("sender_id <> reciever_id" , name = "ck_friendship_not_self"),
     )
 
     id:int | None = Field(default = None , primary_key = True)

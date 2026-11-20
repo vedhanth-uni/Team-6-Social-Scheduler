@@ -1,6 +1,7 @@
 # the database side of the friends panel: accept, decline, unfriend
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from app.models.friendships import STATUS_ACCEPTED, STATUS_PENDING, Friendship
@@ -117,3 +118,9 @@ def test_remove_friend_with_pending_request_returns_404_and_keeps_it(client, aut
     assert res.status_code == 404
     assert [row.status for row in all_rows(session)] == [STATUS_PENDING]
 
+
+def test_friendship_row_with_same_sender_and_receiver_is_rejected(session, alice):
+    session.add(Friendship(sender_id=alice.id, reciever_id=alice.id))
+
+    with pytest.raises(IntegrityError):
+        session.commit()
